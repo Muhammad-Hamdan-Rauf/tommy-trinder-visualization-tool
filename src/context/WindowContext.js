@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { generateUniqueId, createDefaultTransform } from '../utils/coordinateUtils.js';
+import { saveToLocalStorage, loadFromLocalStorage } from '../utils/persistenceUtils.js';
 
 // Initial window configuration state
 const initialWindowState = {
@@ -109,7 +111,47 @@ const initialWindowState = {
     showModal: null,
     modalData: null,
   },
+  
+  // ===== PHOTO VISUALIZATION STATE =====
+  
+  // Photo Bank - all uploaded background photos
+  photoBank: [],
+  
+  // Current selected photo for visualization
+  selectedPhotoId: null,
+  
+  // Draft visualization state (current working state, editable)
+  draftVisualization: {
+    products: [], // Array of product overlays with normalized coordinates
+    isDirty: false, // Has unsaved changes
+  },
+  
+  // Completed visualizations (immutable once saved)
+  completedVisualizations: [],
 };
+
+// Product overlay structure (stored in draft and completed visualizations)
+// {
+//   id: string (UUID),
+//   name: string,
+//   url: string (data URL),
+//   position: { x: number, y: number, width: number, height: number } (0-1 normalized),
+//   transform: { rotation: number, skewX: number, skewY: number, scale: number },
+//   createdAt: string (ISO timestamp),
+//   updatedAt: string (ISO timestamp),
+// }
+
+// Completed visualization structure
+// {
+//   id: string (UUID),
+//   name: string,
+//   backgroundPhotoId: string,
+//   products: Array<Product>,
+//   thumbnail: string (data URL),
+//   attachedToQuote: boolean,
+//   locked: boolean (immutable flag),
+//   createdAt: string (ISO timestamp),
+// }
 
 // Action types
 const ACTIONS = {
@@ -130,6 +172,24 @@ const ACTIONS = {
   SET_UI: 'SET_UI',
   RESET_WINDOW: 'RESET_WINDOW',
   LOAD_WINDOW: 'LOAD_WINDOW',
+  
+  // Photo Bank actions
+  ADD_PHOTO: 'ADD_PHOTO',
+  DELETE_PHOTO: 'DELETE_PHOTO',
+  RENAME_PHOTO: 'RENAME_PHOTO',
+  SELECT_PHOTO: 'SELECT_PHOTO',
+  
+  // Draft visualization actions
+  ADD_PRODUCT_TO_DRAFT: 'ADD_PRODUCT_TO_DRAFT',
+  UPDATE_PRODUCT_IN_DRAFT: 'UPDATE_PRODUCT_IN_DRAFT',
+  DELETE_PRODUCT_FROM_DRAFT: 'DELETE_PRODUCT_FROM_DRAFT',
+  CLEAR_DRAFT: 'CLEAR_DRAFT',
+  
+  // Completed visualization actions
+  SAVE_VISUALIZATION: 'SAVE_VISUALIZATION',
+  DELETE_VISUALIZATION: 'DELETE_VISUALIZATION',
+  TOGGLE_QUOTE_ATTACHMENT: 'TOGGLE_QUOTE_ATTACHMENT',
+  LOAD_VISUALIZATION_TO_DRAFT: 'LOAD_VISUALIZATION_TO_DRAFT',
 };
 
 // Reducer function
@@ -200,6 +260,142 @@ function windowReducer(state, action) {
     case ACTIONS.LOAD_WINDOW:
       return { ...state, ...action.payload };
       
+    // Photo Bank actions
+    case ACTIONS.ADD_PHOTO:
+      return {
+        ...state,
+        photoBank: [...state.photoBank, action.payload],
+      };
+      
+    case ACTIONS.DELETE_PHOTO: {
+      const photoId = action.payload;
+      return {
+        ...state,
+        photoBank: state.photoBank.filter(p => p.id !== photoId),
+        selectedPhotoId: state.selectedPhotoId === photoId ? null : state.selectedPhotoId,
+        // Clear draft if deleting the selected photo
+        draftVisualization: state.selectedPhotoId === photoId 
+          ? { products: [], isDirty: false }
+          : state.draftVisualization,
+      };
+    }
+      
+    case ACTIONS.RENAME_PHOTO:
+      return {
+        ...state,
+        photoBank: state.photoBank.map(p =>
+          p.id === action.payload.photoId
+            ? { ...p, name: action.payload.newName }
+            : p
+        ),
+      };
+      
+    case ACTIONS.SELECT_PHOTO:
+      return {
+        ...state,
+        selectedPhotoId: action.payload,
+      };
+      
+    // Draft visualization actions
+    case ACTIONS.ADD_PRODUCT_TO_DRAFT: {
+      const newProduct = {
+        ...action.payload,
+        id: generateUniqueId(),
+        transform: action.payload.transform || createDefaultTransform(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      return {
+        ...state,
+        draftVisualization: {
+          products: [...state.draftVisualization.products, newProduct],
+          isDirty: true,
+        },
+      };
+    }
+      
+    case ACTIONS.UPDATE_PRODUCT_IN_DRAFT:
+      return {
+        ...state,
+        draftVisualization: {
+          products: state.draftVisualization.products.map(p =>
+            p.id === action.payload.id
+              ? { ...p, ...action.payload, updatedAt: new Date().toISOString() }
+              : p
+          ),
+          isDirty: true,
+        },
+      };
+      
+    case ACTIONS.DELETE_PRODUCT_FROM_DRAFT:
+      return {
+        ...state,
+        draftVisualization: {
+          products: state.draftVisualization.products.filter(p => p.id !== action.payload),
+          isDirty: state.draftVisualization.products.length > 1,
+        },
+      };
+      
+    case ACTIONS.CLEAR_DRAFT:
+      return {
+        ...state,
+        draftVisualization: {
+          products: [],
+          isDirty: false,
+        },
+        selectedPhotoId: null,
+      };
+      
+    // Completed visualization actions
+    case ACTIONS.SAVE_VISUALIZATION: {
+      const newVisualization = {
+        ...action.payload,
+        id: generateUniqueId(),
+        locked: true,
+        createdAt: new Date().toISOString(),
+      };
+      return {
+        ...state,
+        completedVisualizations: [...state.completedVisualizations, newVisualization],
+        draftVisualization: {
+          products: [],
+          isDirty: false,
+        },
+        selectedPhotoId: null,
+      };
+    }
+      
+    case ACTIONS.DELETE_VISUALIZATION:
+      return {
+        ...state,
+        completedVisualizations: state.completedVisualizations.filter(
+          v => v.id !== action.payload
+        ),
+      };
+      
+    case ACTIONS.TOGGLE_QUOTE_ATTACHMENT:
+      return {
+        ...state,
+        completedVisualizations: state.completedVisualizations.map(v =>
+          v.id === action.payload
+            ? { ...v, attachedToQuote: !v.attachedToQuote }
+            : v
+        ),
+      };
+      
+    case ACTIONS.LOAD_VISUALIZATION_TO_DRAFT: {
+      const viz = state.completedVisualizations.find(v => v.id === action.payload);
+      if (!viz) return state;
+      return {
+        ...state,
+        selectedPhotoId: viz.backgroundPhotoId,
+        draftVisualization: {
+          products: viz.products.map(p => ({ ...p, id: generateUniqueId() })), // New IDs for editable copies
+          isDirty: false,
+        },
+      };
+    }
+      
     default:
       return state;
   }
@@ -254,7 +450,19 @@ const WindowContext = createContext();
 
 // Provider component
 function WindowProvider({ children }) {
-  const [state, dispatch] = useReducer(windowReducer, initialWindowState);
+  // Try to load persisted state on mount
+  const persistedState = loadFromLocalStorage();
+  const mergedInitialState = persistedState 
+    ? { ...initialWindowState, ...persistedState }
+    : initialWindowState;
+    
+  const [state, dispatch] = useReducer(windowReducer, mergedInitialState);
+  
+  // Auto-save to localStorage when relevant state changes
+  useEffect(() => {
+    // Only save photoBank and completedVisualizations (not draft or UI state)
+    saveToLocalStorage(state);
+  }, [state.photoBank, state.completedVisualizations]);
   
   // Action creators
   const actions = {
@@ -281,6 +489,24 @@ function WindowProvider({ children }) {
     hideModal: () => dispatch({ type: ACTIONS.SET_UI, payload: { showModal: null, modalData: null } }),
     selectPane: (paneId) => dispatch({ type: ACTIONS.SET_UI, payload: { selectedPane: paneId } }),
     setActiveTab: (tab) => dispatch({ type: ACTIONS.SET_UI, payload: { activeTab: tab } }),
+    
+    // Photo Bank actions
+    addPhoto: (photo) => dispatch({ type: ACTIONS.ADD_PHOTO, payload: photo }),
+    deletePhoto: (photoId) => dispatch({ type: ACTIONS.DELETE_PHOTO, payload: photoId }),
+    renamePhoto: (photoId, newName) => dispatch({ type: ACTIONS.RENAME_PHOTO, payload: { photoId, newName } }),
+    selectPhoto: (photoId) => dispatch({ type: ACTIONS.SELECT_PHOTO, payload: photoId }),
+    
+    // Draft visualization actions
+    addProductToDraft: (product) => dispatch({ type: ACTIONS.ADD_PRODUCT_TO_DRAFT, payload: product }),
+    updateProductInDraft: (product) => dispatch({ type: ACTIONS.UPDATE_PRODUCT_IN_DRAFT, payload: product }),
+    deleteProductFromDraft: (productId) => dispatch({ type: ACTIONS.DELETE_PRODUCT_FROM_DRAFT, payload: productId }),
+    clearDraft: () => dispatch({ type: ACTIONS.CLEAR_DRAFT }),
+    
+    // Completed visualization actions
+    saveVisualization: (visualization) => dispatch({ type: ACTIONS.SAVE_VISUALIZATION, payload: visualization }),
+    deleteVisualization: (vizId) => dispatch({ type: ACTIONS.DELETE_VISUALIZATION, payload: vizId }),
+    toggleQuoteAttachment: (vizId) => dispatch({ type: ACTIONS.TOGGLE_QUOTE_ATTACHMENT, payload: vizId }),
+    loadVisualizationToDraft: (vizId) => dispatch({ type: ACTIONS.LOAD_VISUALIZATION_TO_DRAFT, payload: vizId }),
   };
   
   return React.createElement(WindowContext.Provider, { value: { state, actions, dispatch } }, children);

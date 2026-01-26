@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useWindow } from './context/WindowContext.js';
 import PhotoBank from './components/PhotoBank.js';
 import CanvasArea from './components/CanvasArea.js';
 import Controls from './components/Controls.js';
@@ -8,117 +9,127 @@ import './App.css';
 /**
  * Main App Component
  * Manages state for the entire photo visualization tool
+ * Now uses centralized WindowContext for all state management
  */
 function App() {
-  // Photo Bank state - stores all uploaded photos
-  const [photos, setPhotos] = useState([]);
-  const [selectedPhotoId, setSelectedPhotoId] = useState(null);
+  const { state, actions } = useWindow();
   
-  // Canvas state - current working visualization
-  const [products, setProducts] = useState([]);
-  
-  // Completed visualizations state
-  const [completedImages, setCompletedImages] = useState([]);
+  // Destructure state for easier access
+  const photos = state.photoBank;
+  const selectedPhotoId = state.selectedPhotoId;
+  const draftProducts = state.draftVisualization.products;
+  const completedVisualizations = state.completedVisualizations;
+  const isDirty = state.draftVisualization.isDirty;
 
-  // Photo Bank handlers
+  // Photo Bank handlers (now dispatch to context)
   const handleAddPhoto = (photo) => {
-    setPhotos([...photos, photo]);
+    actions.addPhoto(photo);
   };
 
   const handleDeletePhoto = (photoId) => {
-    setPhotos(photos.filter(p => p.id !== photoId));
-    if (selectedPhotoId === photoId) {
-      setSelectedPhotoId(null);
-      setProducts([]); // Clear canvas if deleting selected photo
-    }
+    actions.deletePhoto(photoId);
   };
 
   const handleRenamePhoto = (photoId, newName) => {
-    setPhotos(photos.map(p => 
-      p.id === photoId ? { ...p, name: newName } : p
-    ));
+    actions.renamePhoto(photoId, newName);
   };
 
   const handleSelectPhoto = (photoId) => {
-    if (products.length > 0) {
+    // Warn if there are unsaved changes
+    if (isDirty && draftProducts.length > 0) {
       const confirm = window.confirm(
-        'Selecting a new photo will clear your current work. Continue?'
+        'You have unsaved changes. Selecting a new photo will clear your current work. Continue?'
       );
       if (!confirm) return;
-      setProducts([]);
+      actions.clearDraft();
     }
-    setSelectedPhotoId(photoId);
+    actions.selectPhoto(photoId);
   };
 
   // Canvas handlers
   const handleAddProduct = (product) => {
-    setProducts([...products, product]);
+    actions.addProductToDraft(product);
   };
 
   const handleUpdateProduct = (updatedProduct) => {
-    setProducts(products.map(p => 
-      p.id === updatedProduct.id ? updatedProduct : p
-    ));
+    actions.updateProductInDraft(updatedProduct);
   };
 
   const handleDeleteProduct = (productId) => {
-    setProducts(products.filter(p => p.id !== productId));
+    actions.deleteProductFromDraft(productId);
   };
 
   // Save visualization
   const handleSaveVisualization = () => {
-    if (!selectedPhotoId || products.length === 0) return;
+    if (!selectedPhotoId || draftProducts.length === 0) {
+      alert('Cannot save: No photo selected or no products added.');
+      return;
+    }
 
     const selectedPhoto = photos.find(p => p.id === selectedPhotoId);
-    const name = prompt('Enter a name for this visualization:', `Viz-${Date.now()}`);
+    if (!selectedPhoto) {
+      alert('Selected photo not found.');
+      return;
+    }
     
-    if (!name) return;
+    const name = prompt('Enter a name for this visualization:', `Visualization-${Date.now()}`);
+    
+    if (!name || !name.trim()) {
+      return;
+    }
 
-    // Create a composite image by capturing the canvas state
-    // In a real app, you'd use html2canvas or similar
-    // For now, we'll just store the state
+    // Create a completed visualization
     const newVisualization = {
-      id: Date.now(),
       name: name.trim(),
-      thumbnail: selectedPhoto.url, // Simplified - use background as thumbnail
-      backgroundPhoto: selectedPhoto,
-      products: [...products],
+      thumbnail: selectedPhoto.url, // Use background as thumbnail
+      backgroundPhotoId: selectedPhotoId,
+      products: draftProducts.map(p => ({ ...p })), // Deep copy products
       attachedToQuote: false,
-      createdAt: new Date().toISOString(),
+      locked: true, // Mark as immutable
     };
 
-    setCompletedImages([...completedImages, newVisualization]);
-    
-    // Clear canvas after saving
-    setProducts([]);
-    setSelectedPhotoId(null);
+    actions.saveVisualization(newVisualization);
     
     alert('Visualization saved successfully!');
   };
 
   // Clear canvas
   const handleClearCanvas = () => {
-    if (products.length > 0 || selectedPhotoId) {
-      const confirm = window.confirm('Are you sure you want to clear the canvas?');
+    if (draftProducts.length > 0 || selectedPhotoId) {
+      const confirm = window.confirm('Are you sure you want to clear the canvas? Any unsaved work will be lost.');
       if (!confirm) return;
     }
-    setProducts([]);
-    setSelectedPhotoId(null);
+    actions.clearDraft();
   };
 
   // Completed images handlers
   const handleDeleteCompleted = (imageId) => {
-    const confirm = window.confirm('Delete this visualization?');
+    const viz = completedVisualizations.find(v => v.id === imageId);
+    if (viz && viz.attachedToQuote) {
+      alert('Cannot delete a visualization attached to a quote. Remove it from the quote first.');
+      return;
+    }
+    
+    const confirm = window.confirm('Delete this visualization? This action cannot be undone.');
     if (!confirm) return;
-    setCompletedImages(completedImages.filter(img => img.id !== imageId));
+    
+    actions.deleteVisualization(imageId);
   };
 
   const handleToggleQuoteAttachment = (imageId) => {
-    setCompletedImages(completedImages.map(img =>
-      img.id === imageId 
-        ? { ...img, attachedToQuote: !img.attachedToQuote }
-        : img
-    ));
+    actions.toggleQuoteAttachment(imageId);
+  };
+  
+  const handleEditVisualization = (imageId) => {
+    if (isDirty && draftProducts.length > 0) {
+      const confirm = window.confirm(
+        'Loading this visualization will replace your current work. Continue?'
+      );
+      if (!confirm) return;
+    }
+    
+    actions.loadVisualizationToDraft(imageId);
+    alert('Visualization loaded to canvas. You can now edit it. Remember to save when done!');
   };
 
   // Get selected photo object
@@ -127,12 +138,12 @@ function App() {
   return React.createElement('div', { className: 'app' },
     React.createElement('header', { className: 'app-header' },
       React.createElement('h1', null, 'Photo Visualization Tool'),
-      React.createElement('p', null, 'Upload photos, embed product images, and create visualizations')
+      React.createElement('p', null, 'Upload photos, embed product images, and create professional visualizations')
     ),
 
     React.createElement('div', { className: 'app-layout' },
       // Left sidebar - Photo Bank
-      React.createElement('aside', { className: 'sidebar' },
+      React.createElement('aside', { className: 'sidebar sidebar-left' },
         React.createElement(PhotoBank, {
           photos: photos,
           onAddPhoto: handleAddPhoto,
@@ -147,7 +158,7 @@ function App() {
       React.createElement('main', { className: 'main-content' },
         React.createElement(CanvasArea, {
           backgroundPhoto: selectedPhoto,
-          products: products,
+          products: draftProducts,
           onAddProduct: handleAddProduct,
           onUpdateProduct: handleUpdateProduct,
           onDeleteProduct: handleDeleteProduct
@@ -156,16 +167,18 @@ function App() {
         React.createElement(Controls, {
           onSave: handleSaveVisualization,
           onClear: handleClearCanvas,
-          canSave: selectedPhotoId !== null && products.length > 0
+          canSave: selectedPhotoId !== null && draftProducts.length > 0,
+          isDirty: isDirty
         })
       ),
 
       // Right sidebar - Completed Images
-      React.createElement('aside', { className: 'sidebar-right' },
+      React.createElement('aside', { className: 'sidebar sidebar-right' },
         React.createElement(CompletedImages, {
-          completedImages: completedImages,
+          completedImages: completedVisualizations,
           onDelete: handleDeleteCompleted,
-          onToggleQuoteAttachment: handleToggleQuoteAttachment
+          onToggleQuoteAttachment: handleToggleQuoteAttachment,
+          onEdit: handleEditVisualization
         })
       )
     )

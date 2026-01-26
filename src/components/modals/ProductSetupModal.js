@@ -22,7 +22,6 @@ function ProductSetupModal({ isOpen, onClose, onSave, productType = 'Flush Casem
       return;
     }
     onSave({ jobType, location: location.trim(), productType });
-    onClose();
   };
   
   return React.createElement(Modal, {

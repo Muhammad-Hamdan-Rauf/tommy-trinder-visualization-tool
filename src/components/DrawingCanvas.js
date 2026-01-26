@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useWindow } from '../context/WindowContext.js';
-import { IconButton } from './common/UIComponents.js';
 
 /**
  * DrawingCanvas Component
@@ -8,13 +7,15 @@ import { IconButton } from './common/UIComponents.js';
  * User draws outline -> becomes window frame
  * User draws lines inside -> creates pane divisions
  */
-function DrawingCanvas({ width = 800, height = 600, onOpenDimensionsModal }) {
+function DrawingCanvas({ onOpenDimensionsModal }) {
   const canvasRef = useRef(null);
+  const containerRef = useRef(null);
   const { state, actions } = useWindow();
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentPath, setCurrentPath] = useState([]);
   const [paths, setPaths] = useState([]);
-  const [tool, setTool] = useState('select'); // select, draw, erase
+  const [tool, setTool] = useState('draw'); // select, draw, erase - default to draw
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
   
   // Grid settings
   const gridSize = 20;
@@ -24,6 +25,25 @@ function DrawingCanvas({ width = 800, height = 600, onOpenDimensionsModal }) {
   const [frameDrawn, setFrameDrawn] = useState(false);
   const [frameRect, setFrameRect] = useState(null);
   const [dividerLines, setDividerLines] = useState([]);
+  
+  // Resize observer to make canvas fill container
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    
+    const resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setCanvasSize({ 
+          width: Math.floor(width), 
+          height: Math.floor(height) 
+        });
+      }
+    });
+    
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
+  }, []);
   
   // Update frame dimensions when state.dimensions change
   useEffect(() => {
@@ -39,12 +59,14 @@ function DrawingCanvas({ width = 800, height = 600, onOpenDimensionsModal }) {
   // Initialize canvas
   useEffect(() => {
     const canvas = canvasRef.current;
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     renderCanvas(ctx);
-  }, [paths, currentPath, frameRect, dividerLines, state.preview.showDimensions]);
+  }, [paths, currentPath, frameRect, dividerLines, state.preview.showDimensions, canvasSize]);
   
   // Render the canvas
   const renderCanvas = (ctx) => {
+    const { width, height } = canvasSize;
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
     
@@ -93,6 +115,7 @@ function DrawingCanvas({ width = 800, height = 600, onOpenDimensionsModal }) {
   
   // Draw grid background
   const drawGrid = (ctx) => {
+    const { width, height } = canvasSize;
     ctx.strokeStyle = '#e0e0e0';
     ctx.lineWidth = 0.5;
     
@@ -106,7 +129,7 @@ function DrawingCanvas({ width = 800, height = 600, onOpenDimensionsModal }) {
     for (let y = 0; y <= height; y += gridSize) {
       ctx.beginPath();
       ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
+      ctx.lineTo(canvasSize.width, y);
       ctx.stroke();
     }
   };
@@ -433,61 +456,14 @@ function DrawingCanvas({ width = 800, height = 600, onOpenDimensionsModal }) {
     actions.addHorizontalDivider(horizontalY - frameRect.y);
   };
   
-  return React.createElement('div', { className: 'drawing-canvas-container' },
-    // Toolbar
-    React.createElement('div', { className: 'drawing-toolbar' },
-      React.createElement(IconButton, {
-        icon: '☝',
-        label: 'SELECT & EDIT',
-        active: tool === 'select',
-        onClick: () => setTool('select')
-      }),
-      React.createElement(IconButton, {
-        icon: '✏',
-        label: 'DRAW',
-        active: tool === 'draw',
-        onClick: () => setTool('draw')
-      }),
-      React.createElement(IconButton, {
-        icon: '⌫',
-        label: 'ERASE',
-        active: tool === 'erase',
-        onClick: () => setTool('erase')
-      }),
-      React.createElement(IconButton, {
-        icon: '📐',
-        label: 'DIMENSIONS',
-        active: frameRect !== null,
-        onClick: () => {
-          if (frameRect && onOpenDimensionsModal) {
-            onOpenDimensionsModal();
-          } else if (!frameRect) {
-            alert('Please draw a window frame first');
-          }
-        }
-      }),
-      React.createElement(IconButton, {
-        icon: '⊞',
-        label: 'AUTO GRID',
-        onClick: handleAutoGrid
-      }),
-      React.createElement('button', {
-        className: 'toolbar-btn undo-btn',
-        onClick: handleUndo,
-        title: 'Undo'
-      }, '↩'),
-      React.createElement('button', {
-        className: 'toolbar-btn clear-btn danger',
-        onClick: handleClear,
-        title: 'Clear'
-      }, '🗑')
-    ),
-    
-    // Canvas
+  return React.createElement('div', { 
+    ref: containerRef,
+    className: 'canvas-container'
+  },
     React.createElement('canvas', {
       ref: canvasRef,
-      width: width,
-      height: height,
+      width: canvasSize.width,
+      height: canvasSize.height,
       className: 'drawing-canvas',
       onMouseDown: handleMouseDown,
       onMouseMove: handleMouseMove,
@@ -496,14 +472,7 @@ function DrawingCanvas({ width = 800, height = 600, onOpenDimensionsModal }) {
       style: {
         cursor: tool === 'draw' ? 'crosshair' : tool === 'erase' ? 'not-allowed' : 'default'
       }
-    }),
-    
-    // Instructions
-    !frameDrawn && React.createElement('div', { className: 'drawing-instructions' },
-      React.createElement('p', null, '✏️ Select DRAW tool and draw a rectangle shape to create a window frame'),
-      React.createElement('p', null, '📏 Draw vertical lines inside to create columns'),
-      React.createElement('p', null, '📏 Draw horizontal lines inside to create rows')
-    )
+    })
   );
 }
 

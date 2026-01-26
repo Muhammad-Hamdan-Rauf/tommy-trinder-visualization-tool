@@ -10,52 +10,45 @@ function OpenersPanel({ onOpenModal }) {
   const { state, actions } = useWindow();
   const { panes, openers } = state;
   
-  const openerTypes = [
-    { id: 'side-hung-left', name: 'Side Hung Left', icon: '◧' },
-    { id: 'side-hung-right', name: 'Side Hung Right', icon: '◨' },
-    { id: 'top-hung', name: 'Top Hung', icon: '⬒' },
-    { id: 'fixed', name: 'Fixed', icon: '▢' },
-  ];
+  const openerIcons = {
+    'side-hung': '◧',
+    'top-hung': '⬒',
+    'fixed': '▢',
+  };
   
   return React.createElement('div', { className: 'panel openers-panel' },
-    React.createElement('h3', null, 'Window Openers'),
-    React.createElement('p', { className: 'panel-description' },
-      'Click on a pane in the preview to set its opener type'
+    React.createElement('div', { className: 'panel-header' },
+      React.createElement('h3', null, 'Window Openers'),
+      React.createElement('p', { className: 'panel-subtitle' }, 'Configure how each pane opens')
     ),
     
-    React.createElement('div', { className: 'pane-openers-list' },
-      panes.map((pane) =>
-        React.createElement('div', {
+    React.createElement('div', { className: 'extras-list' },
+      panes.map((pane) => {
+        const opener = openers[pane.id] || { type: 'fixed', name: 'Fixed' };
+        return React.createElement('div', {
           key: pane.id,
-          className: 'pane-opener-item',
+          className: `extra-item ${opener.type !== 'fixed' ? 'enabled' : 'disabled'}`,
           onClick: () => onOpenModal('opener', { paneId: pane.id })
         },
-          React.createElement('span', { className: 'pane-label' }, `Pane ${pane.id}`),
-          React.createElement('span', { className: 'opener-type' },
-            openers[pane.id]?.name || 'Fixed'
+          React.createElement('div', { className: 'extra-item-icon' },
+            React.createElement('span', { className: 'icon' }, 
+              openerIcons[opener.type] || '▢'
+            )
           ),
-          React.createElement('button', { className: 'edit-btn' }, '✏️')
-        )
-      )
-    ),
-    
-    React.createElement('div', { className: 'quick-actions' },
-      React.createElement(Button, {
-        variant: 'outline',
-        onClick: () => {
-          panes.forEach(pane => {
-            actions.setOpener(pane.id, { type: 'side-hung', hinge: 'left', name: 'Side Hung Left' });
-          });
-        }
-      }, 'All Side Hung'),
-      React.createElement(Button, {
-        variant: 'outline',
-        onClick: () => {
-          panes.forEach(pane => {
-            actions.setOpener(pane.id, { type: 'top-hung', hinge: 'top', name: 'Top Hung' });
-          });
-        }
-      }, 'All Top Hung')
+          React.createElement('div', { className: 'extra-item-content' },
+            React.createElement('div', { className: 'extra-label-row' },
+              React.createElement('span', { className: 'extra-label' }, `Pane ${pane.id}`),
+              React.createElement('span', { 
+                className: `toggle-indicator ${opener.type !== 'fixed' ? 'on' : 'off'}` 
+              }, opener.type !== 'fixed' ? 'ACTIVE' : 'FIXED')
+            ),
+            React.createElement('span', { className: 'extra-description' },
+              opener.name || 'Fixed - No opening'
+            )
+          ),
+          React.createElement('button', { className: 'extra-edit-btn' }, '›')
+        );
+      })
     )
   );
 }
@@ -68,26 +61,44 @@ function ProfilePanel({ onOpenModal }) {
   const { state } = useWindow();
   
   const profiles = [
-    { id: 'flush-casement', name: 'Flush Casement', description: 'Modern flush sash design' },
-    { id: 'sculptured', name: 'Sculptured', description: 'Traditional sculptured appearance' },
-    { id: 'chamfered', name: 'Chamfered', description: 'Classic chamfered profile' },
+    { id: 'flush-casement', name: 'Flush Casement', icon: '▭', description: 'Modern flush sash design' },
+    { id: 'sculptured', name: 'Sculptured', icon: '▯', description: 'Traditional sculptured appearance' },
+    { id: 'chamfered', name: 'Chamfered', icon: '▱', description: 'Classic chamfered profile' },
   ];
   
+  const currentProfile = state.productType.toLowerCase().replace(' ', '-');
+  
   return React.createElement('div', { className: 'panel profile-panel' },
-    React.createElement('h3', null, 'Window Profile'),
+    React.createElement('div', { className: 'panel-header' },
+      React.createElement('h3', null, 'Window Profile'),
+      React.createElement('p', { className: 'panel-subtitle' }, 'Select your preferred window profile style')
+    ),
     
-    React.createElement('div', { className: 'profile-grid' },
-      profiles.map((profile) =>
-        React.createElement(Card, {
+    React.createElement('div', { className: 'extras-list' },
+      profiles.map((profile) => {
+        const isSelected = currentProfile.includes(profile.id);
+        return React.createElement('div', {
           key: profile.id,
-          selected: state.productType.toLowerCase().includes(profile.id.replace('-', ' ')),
-          onClick: () => {},
-          className: 'profile-card'
+          className: `extra-item ${isSelected ? 'enabled' : 'disabled'}`,
+          onClick: () => {}
         },
-          React.createElement('span', { className: 'profile-name' }, profile.name),
-          React.createElement('p', { className: 'profile-desc' }, profile.description)
-        )
-      )
+          React.createElement('div', { className: 'extra-item-icon' },
+            React.createElement('span', { className: 'icon' }, profile.icon)
+          ),
+          React.createElement('div', { className: 'extra-item-content' },
+            React.createElement('div', { className: 'extra-label-row' },
+              React.createElement('span', { className: 'extra-label' }, profile.name),
+              React.createElement('span', { 
+                className: `toggle-indicator ${isSelected ? 'on' : 'off'}` 
+              }, isSelected ? 'SELECTED' : 'SELECT')
+            ),
+            React.createElement('span', { className: 'extra-description' },
+              profile.description
+            )
+          ),
+          React.createElement('button', { className: 'extra-edit-btn' }, '›')
+        );
+      })
     )
   );
 }
@@ -100,53 +111,51 @@ function FinishPanel({ onOpenModal }) {
   const { state } = useWindow();
   const { finish } = state;
   
+  const finishParts = [
+    { id: 'frame', name: 'Frame Finish', icon: '▭', finish: finish.frame },
+    { id: 'sash', name: 'Sash Finish', icon: '▢', finish: finish.sash },
+  ];
+  
+  if (state.extras.cill.enabled) {
+    finishParts.push({ id: 'cill', name: 'Cill Finish', icon: '▬', finish: finish.cill || { color: 'White Grain' } });
+  }
+  
   return React.createElement('div', { className: 'panel finish-panel' },
-    React.createElement('h3', null, 'Finish Options'),
+    React.createElement('div', { className: 'panel-header' },
+      React.createElement('h3', null, 'Finish Options'),
+      React.createElement('p', { className: 'panel-subtitle' }, 'Customize colors and finishes for each component')
+    ),
     
-    React.createElement('div', { className: 'finish-sections' },
-      React.createElement('div', {
-        className: 'finish-section',
-        onClick: () => onOpenModal('finish', { part: 'frame' })
-      },
-        React.createElement('span', { className: 'finish-label' }, 'Frame Finish'),
-        React.createElement('div', { className: 'finish-preview' },
-          React.createElement('div', {
-            className: 'finish-swatch',
-            style: { backgroundColor: finish.frame.colorHex || '#f8f6f0' }
-          }),
-          React.createElement('span', null, finish.frame.color)
-        ),
-        React.createElement('button', { className: 'edit-btn' }, '✏️')
-      ),
-      
-      React.createElement('div', {
-        className: 'finish-section',
-        onClick: () => onOpenModal('finish', { part: 'sash' })
-      },
-        React.createElement('span', { className: 'finish-label' }, 'Sash Finish'),
-        React.createElement('div', { className: 'finish-preview' },
-          React.createElement('div', {
-            className: 'finish-swatch',
-            style: { backgroundColor: finish.sash.colorHex || '#f8f6f0' }
-          }),
-          React.createElement('span', null, finish.sash.color)
-        ),
-        React.createElement('button', { className: 'edit-btn' }, '✏️')
-      ),
-      
-      state.extras.cill.enabled && React.createElement('div', {
-        className: 'finish-section',
-        onClick: () => onOpenModal('finish', { part: 'cill' })
-      },
-        React.createElement('span', { className: 'finish-label' }, 'Cill Finish'),
-        React.createElement('div', { className: 'finish-preview' },
-          React.createElement('div', {
-            className: 'finish-swatch',
-            style: { backgroundColor: finish.cill?.colorHex || '#f8f6f0' }
-          }),
-          React.createElement('span', null, finish.cill?.color || 'White Grain')
-        ),
-        React.createElement('button', { className: 'edit-btn' }, '✏️')
+    React.createElement('div', { className: 'extras-list' },
+      finishParts.map((part) =>
+        React.createElement('div', {
+          key: part.id,
+          className: 'extra-item enabled',
+          onClick: () => onOpenModal('finish', { part: part.id })
+        },
+          React.createElement('div', { className: 'extra-item-icon' },
+            React.createElement('span', { className: 'icon' }, part.icon)
+          ),
+          React.createElement('div', { className: 'extra-item-content' },
+            React.createElement('div', { className: 'extra-label-row' },
+              React.createElement('span', { className: 'extra-label' }, part.name),
+              React.createElement('div', {
+                className: 'finish-swatch',
+                style: { 
+                  backgroundColor: part.finish.colorHex || '#f8f6f0',
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '6px',
+                  border: '2px solid #ddd'
+                }
+              })
+            ),
+            React.createElement('span', { className: 'extra-description' },
+              `${part.finish.type || 'Foils'} - ${part.finish.color || 'White Grain'}`
+            )
+          ),
+          React.createElement('button', { className: 'extra-edit-btn' }, '›')
+        )
       )
     )
   );
@@ -162,38 +171,38 @@ function GlassPanel({ onOpenModal }) {
   const defaultGlass = glass.default || {};
   
   return React.createElement('div', { className: 'panel glass-panel' },
-    React.createElement('h3', null, 'Glass Options'),
-    
-    React.createElement('div', { className: 'glass-summary' },
-      React.createElement('p', null, `Type: ${defaultGlass.paneType || 'Double Glazed'}`),
-      React.createElement('p', null, `Texture: ${defaultGlass.texture || 'Clear'}`),
-      React.createElement('p', null, `Spacer: ${defaultGlass.spacerBars || 'Black'}`)
+    React.createElement('div', { className: 'panel-header' },
+      React.createElement('h3', null, 'Glass Options'),
+      React.createElement('p', { className: 'panel-subtitle' }, 'Configure glass specifications for each pane')
     ),
     
-    React.createElement('p', { className: 'panel-description' },
-      'Click on a pane to customize its glass'
-    ),
-    
-    React.createElement('div', { className: 'pane-glass-list' },
-      panes.map((pane) =>
-        React.createElement('div', {
+    React.createElement('div', { className: 'extras-list' },
+      panes.map((pane) => {
+        const paneGlass = glass[pane.id] || defaultGlass;
+        const hasCustomGlass = glass[pane.id] !== undefined;
+        return React.createElement('div', {
           key: pane.id,
-          className: 'pane-glass-item',
+          className: `extra-item ${hasCustomGlass ? 'enabled' : 'disabled'}`,
           onClick: () => onOpenModal('glass', { paneId: pane.id })
         },
-          React.createElement('span', { className: 'pane-label' }, `Pane ${pane.id}`),
-          React.createElement('span', { className: 'glass-type' },
-            (glass[pane.id] || defaultGlass).texture || 'Clear'
+          React.createElement('div', { className: 'extra-item-icon' },
+            React.createElement('span', { className: 'icon' }, '◱')
           ),
-          React.createElement('button', { className: 'edit-btn' }, '✏️')
-        )
-      )
-    ),
-    
-    React.createElement(Button, {
-      variant: 'primary',
-      onClick: () => onOpenModal('glass', { paneId: 'all' })
-    }, 'Edit All Glass')
+          React.createElement('div', { className: 'extra-item-content' },
+            React.createElement('div', { className: 'extra-label-row' },
+              React.createElement('span', { className: 'extra-label' }, `Pane ${pane.id}`),
+              React.createElement('span', { 
+                className: `toggle-indicator ${hasCustomGlass ? 'on' : 'off'}` 
+              }, hasCustomGlass ? 'CUSTOM' : 'DEFAULT')
+            ),
+            React.createElement('span', { className: 'extra-description' },
+              `${paneGlass.paneType || 'Double Glazed'} • ${paneGlass.texture || 'Clear'} • ${paneGlass.spacerBars || 'Black'} Spacer`
+            )
+          ),
+          React.createElement('button', { className: 'extra-edit-btn' }, '›')
+        );
+      })
+    )
   );
 }
 
@@ -205,35 +214,54 @@ function GlazingPanel({ onOpenModal }) {
   const { state, actions } = useWindow();
   const { glazing } = state;
   
-  const glazingTypes = ['None', 'Astragal', 'Georgian', 'Leaded'];
+  const glazingTypes = [
+    { id: 'None', name: 'None', icon: '□', description: 'No glazing bars' },
+    { id: 'Astragal', name: 'Astragal', icon: '⊞', description: 'Traditional astragal bars' },
+    { id: 'Georgian', name: 'Georgian', icon: '⊠', description: 'Classic Georgian style' },
+    { id: 'Leaded', name: 'Leaded', icon: '⊡', description: 'Decorative leaded design' },
+  ];
+  
+  const currentType = glazing.type || 'None';
   
   return React.createElement('div', { className: 'panel glazing-panel' },
-    React.createElement('h3', null, 'Glazing Bars'),
-    
-    React.createElement('div', { className: 'glazing-type-grid' },
-      glazingTypes.map((type) =>
-        React.createElement(Card, {
-          key: type,
-          selected: (glazing.type || 'None') === type,
-          onClick: () => {
-            if (type === 'None') {
-              actions.setGlazing({ type: null });
-            } else {
-              onOpenModal('glazing', { type });
-            }
-          },
-          className: 'glazing-type-card'
-        }, type)
-      )
+    React.createElement('div', { className: 'panel-header' },
+      React.createElement('h3', null, 'Glazing Bars'),
+      React.createElement('p', { className: 'panel-subtitle' }, 'Add decorative glazing bar patterns')
     ),
     
-    glazing.type && React.createElement('div', { className: 'glazing-details' },
-      React.createElement('p', null, `Profile: ${glazing.barProfile}`),
-      React.createElement('p', null, `Back to Back: ${glazing.backToBack ? 'Yes' : 'No'}`),
-      React.createElement(Button, {
-        variant: 'outline',
-        onClick: () => onOpenModal('glazing-dimensions')}
-      , 'Edit Dimensions')
+    React.createElement('div', { className: 'extras-list' },
+      glazingTypes.map((type) => {
+        const isSelected = currentType === type.id;
+        return React.createElement('div', {
+          key: type.id,
+          className: `extra-item ${isSelected ? 'enabled' : 'disabled'}`,
+          onClick: () => {
+            if (type.id === 'None') {
+              actions.setGlazing({ type: null });
+            } else {
+              onOpenModal('glazing', { type: type.id });
+            }
+          }
+        },
+          React.createElement('div', { className: 'extra-item-icon' },
+            React.createElement('span', { className: 'icon' }, type.icon)
+          ),
+          React.createElement('div', { className: 'extra-item-content' },
+            React.createElement('div', { className: 'extra-label-row' },
+              React.createElement('span', { className: 'extra-label' }, type.name),
+              React.createElement('span', { 
+                className: `toggle-indicator ${isSelected ? 'on' : 'off'}` 
+              }, isSelected ? 'ACTIVE' : 'SELECT')
+            ),
+            React.createElement('span', { className: 'extra-description' },
+              isSelected && type.id !== 'None' 
+                ? `${glazing.barProfile || 'Standard'} • ${glazing.backToBack ? 'Back to Back' : 'Single Side'}`
+                : type.description
+            )
+          ),
+          React.createElement('button', { className: 'extra-edit-btn' }, '›')
+        );
+      })
     )
   );
 }
@@ -246,27 +274,54 @@ function HardwarePanel({ onOpenModal }) {
   const { state } = useWindow();
   const { hardware } = state;
   
-  return React.createElement('div', { className: 'panel hardware-panel' },
-    React.createElement('h3', null, 'Hardware'),
-    
-    React.createElement('div', {
-      className: 'hardware-section',
-      onClick: () => onOpenModal('hardware')
+  const hardwareOptions = [
+    { 
+      id: 'handle', 
+      name: 'Handle Type', 
+      icon: '⊶', 
+      value: hardware.handleType,
+      description: hardware.handleType || 'Connoisseur Antique Black'
     },
-      React.createElement('span', { className: 'hardware-label' }, 'Handle Type'),
-      React.createElement('span', { className: 'hardware-value' }, hardware.handleType),
-      React.createElement('button', { className: 'edit-btn' }, '✏️')
+    { 
+      id: 'ventilation', 
+      name: 'Ventilation', 
+      icon: '≡', 
+      value: hardware.ventilation,
+      description: hardware.ventilation || 'None selected'
+    },
+  ];
+  
+  return React.createElement('div', { className: 'panel hardware-panel' },
+    React.createElement('div', { className: 'panel-header' },
+      React.createElement('h3', null, 'Hardware'),
+      React.createElement('p', { className: 'panel-subtitle' }, 'Select handles and ventilation options')
     ),
     
-    React.createElement('div', {
-      className: 'hardware-section',
-      onClick: () => onOpenModal('hardware')
-    },
-      React.createElement('span', { className: 'hardware-label' }, 'Ventilation'),
-      React.createElement('span', { className: 'hardware-value' },
-        hardware.ventilation || 'None'
-      ),
-      React.createElement('button', { className: 'edit-btn' }, '✏️')
+    React.createElement('div', { className: 'extras-list' },
+      hardwareOptions.map((option) => {
+        const hasValue = option.value && option.value !== 'None';
+        return React.createElement('div', {
+          key: option.id,
+          className: `extra-item ${hasValue ? 'enabled' : 'disabled'}`,
+          onClick: () => onOpenModal('hardware')
+        },
+          React.createElement('div', { className: 'extra-item-icon' },
+            React.createElement('span', { className: 'icon' }, option.icon)
+          ),
+          React.createElement('div', { className: 'extra-item-content' },
+            React.createElement('div', { className: 'extra-label-row' },
+              React.createElement('span', { className: 'extra-label' }, option.name),
+              React.createElement('span', { 
+                className: `toggle-indicator ${hasValue ? 'on' : 'off'}` 
+              }, hasValue ? 'SET' : 'NOT SET')
+            ),
+            React.createElement('span', { className: 'extra-description' },
+              option.description
+            )
+          ),
+          React.createElement('button', { className: 'extra-edit-btn' }, '›')
+        );
+      })
     )
   );
 }

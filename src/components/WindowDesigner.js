@@ -23,7 +23,7 @@ function WindowDesigner() {
   const { state, actions } = useWindow();
   
   // View modes: 'welcome', 'setup', 'draw', 'design', 'preview'
-  const [viewMode, setViewMode] = useState('setup');
+  const [viewMode, setViewMode] = useState('welcome');
   
   // Modal state
   const [activeModal, setActiveModal] = useState(null);
@@ -48,7 +48,8 @@ function WindowDesigner() {
       location: productInfo.location,
       jobType: productInfo.jobType
     });
-    setViewMode('draw');
+    // Go directly to main design page with integrated canvas
+    setViewMode('design');
   };
   
   // Handle dimension updates
@@ -248,51 +249,7 @@ function WindowDesigner() {
     );
   }
   
-  // Draw mode
-  if (viewMode === 'draw') {
-    return React.createElement('div', { className: 'window-designer draw-mode' },
-      React.createElement(Header, {
-        onAddItem: () => {
-          if (window.confirm('Start a new window? Current drawing will be cleared.')) {
-            actions.resetWindow();
-            setViewMode('setup');
-          }
-        },
-        onClose: () => {
-          if (window.confirm('Exit drawing mode? Your drawing will be lost.')) {
-            actions.resetWindow();
-            setViewMode('setup');
-          }
-        }
-      }),
-      
-      React.createElement('div', { className: 'draw-mode-content' },
-        React.createElement('div', { className: 'draw-instructions' },
-          React.createElement('h2', null, 'Draw Your Window'),
-          React.createElement('p', null, 'Draw a rectangle to create the window frame, then draw lines inside to create panes')
-        ),
-        React.createElement(DrawingCanvas, { 
-          width: 700, 
-          height: 500,
-          onOpenDimensionsModal: () => handleOpenModal('dimensions')
-        }),
-        
-        React.createElement('div', { className: 'draw-actions' },
-          React.createElement('button', {
-            className: 'btn btn-secondary',
-            onClick: () => setViewMode('setup')
-          }, '← Back'),
-          React.createElement('button', {
-            className: 'btn btn-success',
-            onClick: () => setViewMode('design')
-          }, 'Continue to Design →')
-        )
-      ),
-      renderModals()
-    );
-  }
-  
-  // Design mode (main editor)
+  // Design mode (main editor with integrated drawing)
   return React.createElement('div', { className: 'window-designer design-mode' },
     React.createElement(Header, {
       onAddItem: () => setViewMode('setup'),
@@ -315,59 +272,52 @@ function WindowDesigner() {
         renderActivePanel()
       ),
       
-      // Main area - window preview
-      React.createElement('main', { className: 'window-preview-area' },
-        // Dimension controls
-        React.createElement('div', { className: 'dimension-controls' },
-          React.createElement('button', {
-            className: 'dimension-btn top',
-            onClick: () => handleOpenModal('dimensions')
-          },
-            React.createElement('span', { className: 'dim-marker red' }),
-            React.createElement('span', { className: 'dim-value' }, state.dimensions.width)
-          ),
-          
-          React.createElement('button', {
-            className: 'dimension-btn right',
-            onClick: () => handleOpenModal('dimensions')
-          },
-            React.createElement('span', { className: 'dim-value blue' }, state.dimensions.height)
-          ),
-          
-          state.grid.rows > 1 && React.createElement('button', {
-            className: 'dimension-btn left-upper',
-            onClick: () => handleOpenModal('internal-heights')
-          },
-            React.createElement('span', { className: 'dim-value green' }, state.dimensions.upperHeight)
-          ),
-          
-          state.grid.rows > 1 && React.createElement('button', {
-            className: 'dimension-btn left-lower',
-            onClick: () => handleOpenModal('internal-heights')
-          },
-            React.createElement('span', { className: 'dim-value green' }, state.dimensions.lowerHeight)
-          )
-        ),
+      // Main area - full canvas (fills entire space)
+      React.createElement('main', { className: 'canvas-area' },
+        React.createElement(DrawingCanvas, { 
+          onOpenDimensionsModal: () => handleOpenModal('dimensions')
+        })
+      ),
+      
+      // Right side tools panel (separate from canvas)
+      React.createElement('aside', { className: 'tools-sidebar' },
+        React.createElement('button', {
+          className: 'sidebar-tool-btn',
+          onClick: () => setViewMode('preview'),
+          title: 'Preview on Photo'
+        }, '👁️'),
         
-        // Window renderer
-        React.createElement('div', { className: 'window-renderer-container' },
-          React.createElement(WindowRenderer, {
-            scale: 0.45,
-            interactive: true
-          })
-        ),
+        React.createElement('div', { className: 'tools-divider' }),
         
-        // Quick actions
-        React.createElement('div', { className: 'quick-actions-bar' },
-          React.createElement('button', {
-            className: 'quick-action-btn',
-            onClick: () => setViewMode('draw')
-          }, '✏️ Edit Drawing'),
-          React.createElement('button', {
-            className: 'quick-action-btn preview',
-            onClick: () => setViewMode('preview')
-          }, '👁️ Preview on Photo')
-        )
+        React.createElement('button', {
+          className: 'sidebar-tool-btn',
+          onClick: () => alert('Delete'),
+          title: 'Delete'
+        }, '🗑️'),
+        React.createElement('button', {
+          className: 'sidebar-tool-btn',
+          onClick: () => alert('Undo'),
+          title: 'Undo'
+        }, '↶'),
+        React.createElement('button', {
+          className: 'sidebar-tool-btn active',
+          title: 'Select & Edit'
+        }, '☐'),
+        React.createElement('button', {
+          className: 'sidebar-tool-btn',
+          onClick: () => alert('Eraser'),
+          title: 'Eraser'
+        }, '⌫'),
+        React.createElement('button', {
+          className: 'sidebar-tool-btn',
+          onClick: () => handleOpenModal('dimensions'),
+          title: 'Dimensions'
+        }, '📏'),
+        React.createElement('button', {
+          className: 'sidebar-tool-btn',
+          onClick: () => alert('Auto Grid'),
+          title: 'Auto Grid'
+        }, '⊞')
       )
     ),
     

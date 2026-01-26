@@ -230,23 +230,28 @@ html, body {
 /* Tab Navigation */
 .tab-navigation {
   display: flex;
+  justify-content: center;
+  align-items: center;
   background: var(--bg-white);
   border-bottom: 1px solid var(--border-light);
   padding: 0 var(--spacing-md);
   overflow-x: auto;
+  gap: var(--spacing-xs);
 }
 
 .nav-tab {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
   color: var(--text-light);
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition-fast);
   white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .nav-tab:hover {
@@ -274,6 +279,24 @@ html, body {
   padding: var(--spacing-md);
 }
 
+/* Styled Scrollbar for Sidebar */
+.options-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.options-sidebar::-webkit-scrollbar-track {
+  background: var(--bg-light);
+}
+
+.options-sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 3px;
+}
+
+.options-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 .window-preview-area {
   flex: 1;
   display: flex;
@@ -293,6 +316,9 @@ html, body {
 /* Panel Styles */
 .panel {
   margin-bottom: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .panel h3 {
@@ -300,12 +326,14 @@ html, body {
   font-weight: 600;
   margin-bottom: var(--spacing-md);
   color: var(--text-dark);
+  text-align: center;
 }
 
 .panel-description {
   font-size: 0.85rem;
   color: var(--text-muted);
   margin-bottom: var(--spacing-md);
+  text-align: center;
 }
 
 .pane-openers-list,
@@ -398,29 +426,32 @@ html, body {
 
 /* Extras Panel */
 .panel-header {
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  text-align: center;
 }
 
 .panel-subtitle {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  margin-top: var(--spacing-xs);
+  margin-top: 2px;
   font-weight: 400;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .extras-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .extra-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-lg);
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
   background: var(--bg-white);
-  border: 2px solid var(--border-light);
+  border: 1.5px solid var(--border-light);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -444,14 +475,14 @@ html, body {
 
 .extra-item-icon {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-light);
-  border-radius: var(--radius-md);
-  font-size: 20px;
+  border-radius: var(--radius-sm);
+  font-size: 18px;
 }
 
 .extra-item.enabled .extra-item-icon {
@@ -475,22 +506,22 @@ html, body {
 
 .extra-label {
   font-weight: 600;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text-dark);
 }
 
 .extra-description {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-muted);
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 .toggle-indicator {
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
 .toggle-indicator.on {
@@ -508,10 +539,10 @@ html, body {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 24px;
+  font-size: 20px;
   color: var(--text-muted);
   padding: 0;
-  width: 24px;
+  width: 20px;
   transition: var(--transition-fast);
 }
 
@@ -703,26 +734,27 @@ html, body {
 .draw-mode-content {
   flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: var(--spacing-xl);
   background: var(--bg-light);
+  position: relative;
 }
 
-.draw-instructions {
-  text-align: center;
-  margin-bottom: var(--spacing-lg);
+.floating-continue-btn {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
 }
 
-.draw-instructions h2 {
-  margin-bottom: var(--spacing-sm);
-}
-
-.draw-actions {
-  display: flex;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-lg);
+.floating-continue-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* Icon Button */
@@ -777,37 +809,70 @@ html, body {
   color: var(--text-white);
 }
 
-/* Quick Actions Bar */
-.quick-actions-bar {
-  position: absolute;
-  bottom: var(--spacing-lg);
-  display: flex;
-  gap: var(--spacing-md);
-}
-
-.quick-action-btn {
-  padding: var(--spacing-sm) var(--spacing-lg);
+/* Right Tools Sidebar */
+.tools-sidebar {
+  width: 70px;
   background: var(--bg-white);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: var(--transition-fast);
-  box-shadow: var(--shadow-sm);
+  border-left: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-sm);
+  gap: 10px;
 }
 
-.quick-action-btn:hover {
+.sidebar-tool-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  border: 2px solid var(--border-light);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sidebar-tool-btn:hover {
+  transform: scale(1.05);
+  border-color: var(--primary-color);
   background: var(--bg-light);
 }
 
-.quick-action-btn.preview {
-  background: var(--primary-blue);
-  color: var(--text-white);
-  border-color: var(--primary-blue);
+.sidebar-tool-btn.active {
+  border-color: var(--primary-color);
+  border-width: 3px;
+  background: var(--primary-light);
 }
 
-.quick-action-btn.preview:hover {
-  background: #2980b9;
+.tools-divider {
+  width: 40px;
+  height: 1px;
+  background: var(--border-light);
+  margin: var(--spacing-sm) 0;
+}
+
+/* Canvas Area - Full size drawing canvas */
+.canvas-area {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.canvas-container {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.canvas-container .drawing-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-grid);
 }
 
 /* Footer */
