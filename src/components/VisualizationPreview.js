@@ -144,18 +144,72 @@ function VisualizationPreview({ onBack }) {
               })
             )
           )
-        : React.createElement('div', { className: 'upload-prompt' },
-            React.createElement('div', { className: 'upload-icon' }, '🏠'),
-            React.createElement('h3', null, 'Upload a Background Photo'),
-            React.createElement('p', null, 'Upload a photo of your home to visualize how the window will look'),
+        : React.createElement('div', { 
+            className: 'upload-prompt',
+            style: {
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              textAlign: 'center',
+              padding: '40px'
+            }
+          },
+            React.createElement('div', { 
+              className: 'upload-icon',
+              style: {
+                fontSize: '80px',
+                marginBottom: '24px',
+                opacity: 0.6
+              }
+            }, '📸'),
+            React.createElement('h3', { 
+              style: {
+                fontSize: '24px',
+                fontWeight: '600',
+                marginBottom: '16px',
+                color: '#333'
+              }
+            }, 'Upload a Background Photo'),
+            React.createElement('p', { 
+              style: {
+                fontSize: '16px',
+                color: '#666',
+                maxWidth: '500px',
+                lineHeight: '1.6',
+                marginBottom: '24px'
+              }
+            }, 'Upload a photo of your home to visualize how the window will look'),
             React.createElement(Button, {
               variant: 'primary',
-              onClick: () => fileInputRef.current.click()
-            }, 'Choose Photo')
+              onClick: () => fileInputRef.current.click(),
+              style: {
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: 'white',
+                padding: '12px 32px',
+                fontSize: '16px',
+                fontWeight: '600',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                transition: 'all 0.2s'
+              }
+            }, '📷 Choose Photo')
           ),
       
-      // Window preview without background
-      !state.preview.backgroundImage && React.createElement('div', { className: 'window-only-preview' },
+      // Window preview without background - show even without bg to preview the design
+      !state.preview.backgroundImage && state.panes && state.panes.length > 0 && React.createElement('div', { 
+        className: 'window-only-preview',
+        style: {
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          marginTop: '60px'
+        }
+      },
         React.createElement(WindowRenderer, {
           scale: scale * 1.5,
           interactive: false

@@ -67,11 +67,63 @@ function DrawingCanvas({ onOpenDimensionsModal, onToolsReady }) {
   // Update frame dimensions when state.dimensions change
   useEffect(() => {
     if (frameRect && state.dimensions) {
+      const oldWidth = frameRect.width;
+      const oldHeight = frameRect.height;
+      const newWidth = state.dimensions.width;
+      const newHeight = state.dimensions.height;
+      
+      // Update frame dimensions
       setFrameRect(prev => ({
         ...prev,
-        width: state.dimensions.width,
-        height: state.dimensions.height
+        width: newWidth,
+        height: newHeight
       }));
+      
+      // Scale divider lines proportionally
+      if (dividerLines.length > 0 && (oldWidth !== newWidth || oldHeight !== newHeight)) {
+        const frameWidth = 15;
+        const scaledDividers = dividerLines.map(line => {
+          if (line.orientation === 'vertical') {
+            // Calculate relative position (0-1) and scale to new width
+            const relativeX = (line.x - frameRect.x - frameWidth) / (oldWidth - frameWidth * 2);
+            const newX = frameRect.x + frameWidth + (relativeX * (newWidth - frameWidth * 2));
+            return {
+              ...line,
+              x: newX,
+              y1: frameRect.y + frameWidth,
+              y2: frameRect.y + newHeight - frameWidth
+            };
+          } else {
+            // Calculate relative position (0-1) and scale to new height
+            const relativeY = (line.y - frameRect.y - frameWidth) / (oldHeight - frameWidth * 2);
+            const newY = frameRect.y + frameWidth + (relativeY * (newHeight - frameWidth * 2));
+            return {
+              ...line,
+              y: newY,
+              x1: frameRect.x + frameWidth,
+              x2: frameRect.x + newWidth - frameWidth
+            };
+          }
+        });
+        
+        setDividerLines(scaledDividers);
+        
+        // Sync context state with scaled dividers
+        syncContextFromDividers(scaledDividers, {
+          ...frameRect,
+          width: newWidth,
+          height: newHeight
+        });
+        
+        // Save to history
+        saveToHistory({
+          frameRect: { ...frameRect, width: newWidth, height: newHeight },
+          frameDrawn,
+          dividerLines: scaledDividers,
+          paths: [...paths],
+          drawingSegments: [...drawingSegments]
+        });
+      }
     }
   }, [state.dimensions.width, state.dimensions.height]);
   
@@ -400,7 +452,22 @@ function DrawingCanvas({ onOpenDimensionsModal, onToolsReady }) {
     });
     
     if (lineIndex !== -1) {
-      setDividerLines(prev => prev.filter((_, i) => i !== lineIndex));
+      const updatedDividers = dividerLines.filter((_, i) => i !== lineIndex);
+      setDividerLines(updatedDividers);
+      
+      // Sync context state - rebuild panes/grid from remaining dividers
+      if (frameRect) {
+        syncContextFromDividers(updatedDividers, frameRect);
+      }
+      
+      // Save to history
+      saveToHistory({
+        frameRect,
+        frameDrawn,
+        dividerLines: updatedDividers,
+        paths: [...paths],
+        drawingSegments: [...drawingSegments]
+      });
     }
   };
   
@@ -665,9 +732,6 @@ function DrawingCanvas({ onOpenDimensionsModal, onToolsReady }) {
     const innerWidth = frameRect.width - frameWidth * 2;
     const innerHeight = frameRect.height - frameWidth * 2;
     
-    // Clear existing dividers
-    setDividerLines([]);
-    
     // Add vertical divider in the middle
     const verticalX = frameRect.x + frameWidth + innerWidth / 2;
     const verticalLine = {
@@ -686,12 +750,20 @@ function DrawingCanvas({ onOpenDimensionsModal, onToolsReady }) {
       y: Math.round(horizontalY / gridSize) * gridSize
     };
     
-    setDividerLines([verticalLine, horizontalLine]);
+    const newDividers = [verticalLine, horizontalLine];
+    setDividerLines(newDividers);
     
-    // Update context
-    actions.setGrid({ rows: 2, cols: 2 });
-    actions.addVerticalDivider(verticalX - frameRect.x);
-    actions.addHorizontalDivider(horizontalY - frameRect.y);
+    // Sync context state - this will properly rebuild grid and panes
+    syncContextFromDividers(newDividers, frameRect);
+    
+    // Save to history
+    saveToHistory({
+      frameRect,
+      frameDrawn,
+      dividerLines: newDividers,
+      paths: [...paths],
+      drawingSegments: [...drawingSegments]
+    });
   };
   
   return React.createElement('div', { 

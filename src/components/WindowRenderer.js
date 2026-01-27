@@ -376,6 +376,51 @@ function WindowRenderer({ scale = 0.5, interactive = true }) {
     });
   };
   
+  // Show empty state if no panes designed
+  if (!panes || panes.length === 0) {
+    return React.createElement('div', {
+      className: 'window-renderer-empty',
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '60px 40px',
+        textAlign: 'center',
+        color: '#666',
+        background: '#f9f9f9',
+        borderRadius: '12px',
+        border: '2px dashed #ddd',
+        maxWidth: '500px',
+        margin: '80px auto'
+      }
+    },
+      React.createElement('div', {
+        style: {
+          fontSize: '64px',
+          marginBottom: '20px',
+          opacity: 0.5
+        }
+      }, '🪟'),
+      React.createElement('h3', {
+        style: {
+          fontSize: '20px',
+          fontWeight: '600',
+          marginBottom: '12px',
+          color: '#333'
+        }
+      }, 'No Window Designed Yet'),
+      React.createElement('p', {
+        style: {
+          fontSize: '15px',
+          lineHeight: '1.6',
+          color: '#666',
+          maxWidth: '380px'
+        }
+      }, 'Go back to the editor and draw a window frame with dividers to see it previewed here on your background photo.')
+    );
+  }
+  
   return React.createElement('div', {
     className: 'window-renderer',
     style: {
