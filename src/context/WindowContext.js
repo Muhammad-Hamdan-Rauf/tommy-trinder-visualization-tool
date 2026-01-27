@@ -17,35 +17,25 @@ const initialWindowState = {
     lowerHeight: 1050,
   },
   
-  // Pane structure - grid of panes
-  panes: [
-    { id: 'A-upper', row: 0, col: 0, width: 600, height: 450 },
-    { id: 'B-upper', row: 0, col: 1, width: 600, height: 450 },
-    { id: 'A-lower', row: 1, col: 0, width: 600, height: 1050 },
-    { id: 'B-lower', row: 1, col: 1, width: 600, height: 1050 },
-  ],
+  // Pane structure - empty until window is drawn
+  panes: [],
   
-  // Grid structure
+  // Grid structure - no grid until window is drawn
   grid: {
-    rows: 2,
-    cols: 2,
-    horizontalDividers: [450], // Y positions of horizontal dividers
-    verticalDividers: [600],   // X positions of vertical dividers
+    rows: 1,
+    cols: 1,
+    horizontalDividers: [],
+    verticalDividers: [],
   },
   
-  // Opener configurations per pane
-  openers: {
-    'A-upper': { type: 'top-hung', hinge: 'left' },
-    'B-upper': { type: 'top-hung', hinge: 'right' },
-    'A-lower': { type: 'side-hung', hinge: 'left' },
-    'B-lower': { type: 'side-hung', hinge: 'right' },
-  },
+  // Opener configurations per pane - empty until panes exist
+  openers: {},
   
   // Finish options
   finish: {
-    frame: { type: 'Foils', color: 'White Grain', texture: 'wood-grain' },
-    sash: { type: 'Foils', color: 'White Grain', texture: 'wood-grain' },
-    cill: { type: 'Foils', color: 'White Grain', texture: 'wood-grain' },
+    frame: { type: 'Foils', color: 'White Grain', texture: 'wood-grain', colorHex: '#f8f6f0' },
+    sash: { type: 'Foils', color: 'White Grain', texture: 'wood-grain', colorHex: '#f8f6f0' },
+    cill: { type: 'Foils', color: 'White Grain', texture: 'wood-grain', colorHex: '#f8f6f0' },
   },
   
   // Glass options per pane

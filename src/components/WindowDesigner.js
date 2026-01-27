@@ -29,6 +29,9 @@ function WindowDesigner() {
   const [activeModal, setActiveModal] = useState(null);
   const [modalData, setModalData] = useState(null);
   
+  // Canvas tools reference
+  const [canvasTools, setCanvasTools] = useState(null);
+  
   // Handle modal opening
   const handleOpenModal = (modalType, data = null) => {
     setActiveModal(modalType);
@@ -275,7 +278,8 @@ function WindowDesigner() {
       // Main area - full canvas (fills entire space)
       React.createElement('main', { className: 'canvas-area' },
         React.createElement(DrawingCanvas, { 
-          onOpenDimensionsModal: () => handleOpenModal('dimensions')
+          onOpenDimensionsModal: () => handleOpenModal('dimensions'),
+          onToolsReady: (tools) => setCanvasTools(tools)
         })
       ),
       
@@ -291,21 +295,27 @@ function WindowDesigner() {
         
         React.createElement('button', {
           className: 'sidebar-tool-btn',
-          onClick: () => alert('Delete'),
+          onClick: () => canvasTools?.handleDelete(),
           title: 'Delete'
         }, '🗑️'),
         React.createElement('button', {
           className: 'sidebar-tool-btn',
-          onClick: () => alert('Undo'),
+          onClick: () => canvasTools?.handleUndo(),
           title: 'Undo'
         }, '↶'),
         React.createElement('button', {
-          className: 'sidebar-tool-btn active',
-          title: 'Select & Edit'
+          className: `sidebar-tool-btn ${canvasTools?.tool === 'draw' ? 'active' : ''}`,
+          onClick: () => canvasTools?.setTool('draw'),
+          title: 'Draw'
+        }, '✏️'),
+        React.createElement('button', {
+          className: `sidebar-tool-btn ${canvasTools?.tool === 'select' ? 'active' : ''}`,
+          onClick: () => canvasTools?.setTool('select'),
+          title: 'Select'
         }, '☐'),
         React.createElement('button', {
-          className: 'sidebar-tool-btn',
-          onClick: () => alert('Eraser'),
+          className: `sidebar-tool-btn ${canvasTools?.tool === 'erase' ? 'active' : ''}`,
+          onClick: () => canvasTools?.setTool('erase'),
           title: 'Eraser'
         }, '⌫'),
         React.createElement('button', {
@@ -315,7 +325,7 @@ function WindowDesigner() {
         }, '📏'),
         React.createElement('button', {
           className: 'sidebar-tool-btn',
-          onClick: () => alert('Auto Grid'),
+          onClick: () => canvasTools?.handleAutoGrid(),
           title: 'Auto Grid'
         }, '⊞')
       )

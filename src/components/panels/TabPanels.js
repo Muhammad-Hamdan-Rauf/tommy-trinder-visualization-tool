@@ -16,6 +16,23 @@ function OpenersPanel({ onOpenModal }) {
     'fixed': '▢',
   };
   
+  // Show empty state if no panes exist
+  if (!panes || panes.length === 0) {
+    return React.createElement('div', { className: 'panel openers-panel' },
+      React.createElement('div', { className: 'panel-header' },
+        React.createElement('h3', null, 'Window Openers'),
+        React.createElement('p', { className: 'panel-subtitle' }, 'Configure how each pane opens')
+      ),
+      React.createElement('div', { className: 'empty-state' },
+        React.createElement('div', { className: 'empty-state-icon' }, '✏️'),
+        React.createElement('p', { className: 'empty-state-title' }, 'No Window Drawn Yet'),
+        React.createElement('p', { className: 'empty-state-description' }, 
+          'Draw a window frame on the canvas to configure openers for each pane'
+        )
+      )
+    );
+  }
+  
   return React.createElement('div', { className: 'panel openers-panel' },
     React.createElement('div', { className: 'panel-header' },
       React.createElement('h3', null, 'Window Openers'),
@@ -169,6 +186,23 @@ function GlassPanel({ onOpenModal }) {
   const { state } = useWindow();
   const { panes, glass } = state;
   const defaultGlass = glass.default || {};
+  
+  // Show empty state if no panes exist
+  if (!panes || panes.length === 0) {
+    return React.createElement('div', { className: 'panel glass-panel' },
+      React.createElement('div', { className: 'panel-header' },
+        React.createElement('h3', null, 'Glass Options'),
+        React.createElement('p', { className: 'panel-subtitle' }, 'Configure glass specifications for each pane')
+      ),
+      React.createElement('div', { className: 'empty-state' },
+        React.createElement('div', { className: 'empty-state-icon' }, '✏️'),
+        React.createElement('p', { className: 'empty-state-title' }, 'No Window Drawn Yet'),
+        React.createElement('p', { className: 'empty-state-description' }, 
+          'Draw a window frame on the canvas to configure glass for each pane'
+        )
+      )
+    );
+  }
   
   return React.createElement('div', { className: 'panel glass-panel' },
     React.createElement('div', { className: 'panel-header' },

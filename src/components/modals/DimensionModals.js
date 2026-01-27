@@ -9,6 +9,12 @@ function DimensionsModal({ isOpen, onClose, dimensions, onApply }) {
   const [width, setWidth] = useState(dimensions.width);
   const [height, setHeight] = useState(dimensions.height);
   
+  // Update local state when dimensions prop changes
+  React.useEffect(() => {
+    setWidth(dimensions.width);
+    setHeight(dimensions.height);
+  }, [dimensions.width, dimensions.height, isOpen]);
+  
   const handleApply = () => {
     onApply({ width: parseInt(width) || 1200, height: parseInt(height) || 1500 });
     onClose();
@@ -23,21 +29,23 @@ function DimensionsModal({ isOpen, onClose, dimensions, onApply }) {
     React.createElement('div', { className: 'dimensions-form' },
       React.createElement('div', { className: 'dimensions-row' },
         React.createElement('div', { className: 'dimension-field-group' },
-          React.createElement('label', null, 'Width:'),
+          React.createElement('label', null, 'Width (mm):'),
           React.createElement('input', {
             type: 'number',
             className: 'dimension-input-field',
             value: width,
-            onChange: (e) => setWidth(e.target.value)
+            onChange: (e) => setWidth(e.target.value),
+            placeholder: '1200'
           })
         ),
         React.createElement('div', { className: 'dimension-field-group' },
-          React.createElement('label', null, 'Height:'),
+          React.createElement('label', null, 'Height (mm):'),
           React.createElement('input', {
             type: 'number',
             className: 'dimension-input-field',
             value: height,
-            onChange: (e) => setHeight(e.target.value)
+            onChange: (e) => setHeight(e.target.value),
+            placeholder: '1500'
           })
         )
       ),

@@ -7,7 +7,7 @@ import { useWindow } from '../context/WindowContext.js';
  * User draws outline -> becomes window frame
  * User draws lines inside -> creates pane divisions
  */
-function DrawingCanvas({ onOpenDimensionsModal }) {
+function DrawingCanvas({ onOpenDimensionsModal, onToolsReady }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const { state, actions } = useWindow();
@@ -25,6 +25,25 @@ function DrawingCanvas({ onOpenDimensionsModal }) {
   const [frameDrawn, setFrameDrawn] = useState(false);
   const [frameRect, setFrameRect] = useState(null);
   const [dividerLines, setDividerLines] = useState([]);
+  const [drawingSegments, setDrawingSegments] = useState([]); // Keep track of all segments
+  
+  // Undo/Redo history
+  const [history, setHistory] = useState([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  
+  // Expose tool functions to parent via callback
+  useEffect(() => {
+    if (onToolsReady) {
+      onToolsReady({
+        handleDelete,
+        handleUndo,
+        handleRedo,
+        setTool,
+        handleAutoGrid,
+        tool
+      });
+    }
+  }, [tool, historyIndex, history, frameRect, dividerLines]);
   
   // Resize observer to make canvas fill container
   useEffect(() => {
@@ -62,7 +81,7 @@ function DrawingCanvas({ onOpenDimensionsModal }) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     renderCanvas(ctx);
-  }, [paths, currentPath, frameRect, dividerLines, state.preview.showDimensions, canvasSize]);
+  }, [paths, currentPath, frameRect, dividerLines, drawingSegments, state.preview.showDimensions, canvasSize]);
   
   // Render the canvas
   const renderCanvas = (ctx) => {
@@ -75,11 +94,24 @@ function DrawingCanvas({ onOpenDimensionsModal }) {
       drawGrid(ctx);
     }
     
-    // Draw existing paths (freehand drawing)
-    ctx.strokeStyle = '#00a896';
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    // Draw existing paths (drawing segments before frame is detected)
+    if (!frameDrawn && drawingSegments.length > 0) {
+      ctx.strokeStyle = '#00a896';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      
+      drawingSegments.forEach(path => {
+        if (path.length > 1) {
+          ctx.beginPath();
+          ctx.moveTo(path[0].x, path[0].y);
+          path.forEach(point => {
+            ctx.lineTo(point.x, point.y);
+          });
+          ctx.stroke();
+        }
+      });
+    }
     
     paths.forEach(path => {
       if (path.length > 1) {
@@ -92,8 +124,10 @@ function DrawingCanvas({ onOpenDimensionsModal }) {
       }
     });
     
-    // Draw current path
+    // Draw current path with different color if drawing divider vs frame
     if (currentPath.length > 1) {
+      ctx.strokeStyle = frameDrawn ? '#ff6b6b' : '#00a896'; // Red for dividers, green for frame
+      ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(currentPath[0].x, currentPath[0].y);
       currentPath.forEach(point => {
@@ -270,6 +304,65 @@ function DrawingCanvas({ onOpenDimensionsModal }) {
     return null;
   };
   
+  // Check if all drawn segments form a closed rectangle
+  const detectClosedRectangle = (segments) => {
+    if (segments.length < 3) return null; // Need at least 3 segments for a rectangle
+    
+    // Get all endpoints
+    const points = [];
+    segments.forEach(seg => {
+      if (seg.length > 0) {
+        points.push(seg[0]);
+        points.push(seg[seg.length - 1]);
+      }
+    });
+    
+    if (points.length < 6) return null;
+    
+    // Find bounding box
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    points.forEach(point => {
+      minX = Math.min(minX, point.x);
+      minY = Math.min(minY, point.y);
+      maxX = Math.max(maxX, point.x);
+      maxY = Math.max(maxY, point.y);
+    });
+    
+    const width = maxX - minX;
+    const height = maxY - minY;
+    
+    // Check if we have points near all 4 corners (within tolerance)
+    const tolerance = 40;
+    const corners = [
+      { x: minX, y: minY }, // top-left
+      { x: maxX, y: minY }, // top-right
+      { x: maxX, y: maxY }, // bottom-right
+      { x: minX, y: maxY }  // bottom-left
+    ];
+    
+    let cornersMatched = 0;
+    corners.forEach(corner => {
+      const hasNearbyPoint = points.some(point => 
+        Math.abs(point.x - corner.x) < tolerance && 
+        Math.abs(point.y - corner.y) < tolerance
+      );
+      if (hasNearbyPoint) cornersMatched++;
+    });
+    
+    // If we have points near all 4 corners and reasonable dimensions
+    if (cornersMatched >= 4 && width > 100 && height > 100) {
+      return {
+        type: 'frame',
+        x: minX,
+        y: minY,
+        width: width,
+        height: height
+      };
+    }
+    
+    return null;
+  };
+  
   // Handle mouse down
   const handleMouseDown = (e) => {
     const pos = getMousePos(e);
@@ -318,10 +411,14 @@ function DrawingCanvas({ onOpenDimensionsModal }) {
     setIsDrawing(false);
     
     if (currentPath.length > 5) {
-      const shape = analyzePath(currentPath);
-      
-      if (shape) {
-        if (shape.type === 'frame' && !frameDrawn) {
+      if (!frameDrawn) {
+        // Add this segment to drawing segments
+        const newSegments = [...drawingSegments, currentPath];
+        setDrawingSegments(newSegments);
+        
+        // Check if single path forms a closed frame
+        const shape = analyzePath(currentPath);
+        if (shape && shape.type === 'frame') {
           // Snap to grid
           const snapped = snapToGrid(shape.x, shape.y);
           const snappedRect = {
@@ -332,6 +429,7 @@ function DrawingCanvas({ onOpenDimensionsModal }) {
           };
           setFrameRect(snappedRect);
           setFrameDrawn(true);
+          setDrawingSegments([]); // Clear segments
           
           // Update context dimensions
           actions.setDimensions({
@@ -339,14 +437,47 @@ function DrawingCanvas({ onOpenDimensionsModal }) {
             height: snappedRect.height
           });
           
-          // Clear the green path since we converted it to a frame
           setCurrentPath([]);
+          saveToHistory();
           return;
+        }
+        
+        // Check if all segments together form a closed rectangle
+        const closedRect = detectClosedRectangle(newSegments);
+        if (closedRect) {
+          // Snap to grid
+          const snapped = snapToGrid(closedRect.x, closedRect.y);
+          const snappedRect = {
+            x: snapped.x,
+            y: snapped.y,
+            width: Math.round(closedRect.width / gridSize) * gridSize,
+            height: Math.round(closedRect.height / gridSize) * gridSize
+          };
+          setFrameRect(snappedRect);
+          setFrameDrawn(true);
+          setDrawingSegments([]); // Clear all segments
           
-        } else if (frameDrawn && frameRect) {
-          // Add divider line if drawn inside frame
-          const frameWidth = 15;
+          // Update context dimensions
+          actions.setDimensions({
+            width: snappedRect.width,
+            height: snappedRect.height
+          });
           
+          setCurrentPath([]);
+          saveToHistory();
+          return;
+        }
+        
+        // Keep the segment visible for potential frame detection
+        setCurrentPath([]);
+        return;
+        
+      } else if (frameDrawn && frameRect) {
+        // Drawing dividers inside existing frame
+        const shape = analyzePath(currentPath);
+        const frameWidth = 15;
+        
+        if (shape) {
           if (shape.type === 'vertical-line') {
             // Check if line is inside frame
             if (shape.x > frameRect.x + frameWidth && shape.x < frameRect.x + frameRect.width - frameWidth) {
@@ -356,13 +487,21 @@ function DrawingCanvas({ onOpenDimensionsModal }) {
                 y1: frameRect.y + frameWidth,
                 y2: frameRect.y + frameRect.height - frameWidth
               };
-              setDividerLines(prev => [...prev, newLine]);
+              const updatedDividers = [...dividerLines, newLine];
+              setDividerLines(updatedDividers);
               
               // Update pane count
               actions.addVerticalDivider(shape.x - frameRect.x);
               
-              // Clear the green path since we converted it to a divider
               setCurrentPath([]);
+              // Save to history with updated state
+              saveToHistory({
+                frameRect,
+                frameDrawn,
+                dividerLines: updatedDividers,
+                paths: [...paths],
+                drawingSegments: [...drawingSegments]
+              });
               return;
             }
           } else if (shape.type === 'horizontal-line') {
@@ -373,20 +512,28 @@ function DrawingCanvas({ onOpenDimensionsModal }) {
                 x2: frameRect.x + frameRect.width - frameWidth,
                 y: Math.round(shape.y / gridSize) * gridSize
               };
-              setDividerLines(prev => [...prev, newLine]);
+              const updatedDividers = [...dividerLines, newLine];
+              setDividerLines(updatedDividers);
               
               // Update pane count
               actions.addHorizontalDivider(shape.y - frameRect.y);
               
-              // Clear the green path since we converted it to a divider
               setCurrentPath([]);
+              // Save to history with updated state
+              saveToHistory({
+                frameRect,
+                frameDrawn,
+                dividerLines: updatedDividers,
+                paths: [...paths],
+                drawingSegments: [...drawingSegments]
+              });
               return;
             }
           }
         }
       }
       
-      // Only keep the path if it wasn't converted to a shape
+      // Keep the path if it wasn't converted
       setPaths(prev => [...prev, currentPath]);
     }
     
@@ -403,16 +550,107 @@ function DrawingCanvas({ onOpenDimensionsModal }) {
     actions.resetWindow();
   };
   
-  // Erase last path
-  const handleUndo = () => {
-    if (dividerLines.length > 0) {
-      setDividerLines(prev => prev.slice(0, -1));
-    } else if (paths.length > 0) {
-      setPaths(prev => prev.slice(0, -1));
-      if (paths.length === 1) {
-        setFrameRect(null);
-        setFrameDrawn(false);
+  // Sync context state from divider lines
+  const syncContextFromDividers = (dividers, frame) => {
+    // Reset to empty grid first
+    actions.setGrid({
+      rows: 1,
+      cols: 1,
+      horizontalDividers: [],
+      verticalDividers: []
+    });
+    actions.setPanes([]);
+    
+    // Rebuild from divider lines
+    dividers.forEach(line => {
+      if (line.orientation === 'vertical') {
+        const position = line.x - frame.x;
+        actions.addVerticalDivider(position);
+      } else if (line.orientation === 'horizontal') {
+        const position = line.y - frame.y;
+        actions.addHorizontalDivider(position);
       }
+    });
+  };
+  
+  // Save state to history
+  const saveToHistory = (overrideState = null) => {
+    const state = overrideState || {
+      frameRect,
+      frameDrawn,
+      dividerLines: [...dividerLines],
+      paths: [...paths],
+      drawingSegments: [...drawingSegments]
+    };
+    setHistory(prev => [...prev.slice(0, historyIndex + 1), state]);
+    setHistoryIndex(prev => prev + 1);
+  };
+  
+  // Erase last path - now uses history
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      const state = history[newIndex];
+      setFrameRect(state.frameRect);
+      setFrameDrawn(state.frameDrawn);
+      setDividerLines(state.dividerLines);
+      setPaths(state.paths);
+      setDrawingSegments(state.drawingSegments || []);
+      setHistoryIndex(newIndex);
+      
+      // Sync context state with canvas state
+      if (!state.frameRect) {
+        // No frame - reset everything
+        actions.resetWindow();
+      } else {
+        // Frame exists - rebuild grid and panes from dividers
+        syncContextFromDividers(state.dividerLines, state.frameRect);
+      }
+    } else if (historyIndex === 0) {
+      // Go to completely empty state
+      setFrameRect(null);
+      setFrameDrawn(false);
+      setDividerLines([]);
+      setPaths([]);
+      setDrawingSegments([]);
+      setHistoryIndex(-1);
+      // Reset window context to clear sidebar
+      actions.resetWindow();
+    }
+  };
+  
+  // Redo functionality
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      const state = history[newIndex];
+      setFrameRect(state.frameRect);
+      setFrameDrawn(state.frameDrawn);
+      setDividerLines(state.dividerLines);
+      setPaths(state.paths);
+      setDrawingSegments(state.drawingSegments || []);
+      setHistoryIndex(newIndex);
+      
+      // Sync context state with canvas state
+      if (!state.frameRect) {
+        actions.resetWindow();
+      } else {
+        syncContextFromDividers(state.dividerLines, state.frameRect);
+      }
+    }
+  };
+  
+  // Handle delete - clears everything
+  const handleDelete = () => {
+    if (window.confirm('Clear all drawings?')) {
+      setFrameRect(null);
+      setFrameDrawn(false);
+      setDividerLines([]);
+      setPaths([]);
+      setDrawingSegments([]);
+      setHistory([]);
+      setHistoryIndex(-1);
+      actions.resetWindow();
     }
   };
   
@@ -470,7 +708,7 @@ function DrawingCanvas({ onOpenDimensionsModal }) {
       onMouseUp: handleMouseUp,
       onMouseLeave: handleMouseUp,
       style: {
-        cursor: tool === 'draw' ? 'crosshair' : tool === 'erase' ? 'not-allowed' : 'default'
+        cursor: tool === 'draw' ? 'crosshair' : tool === 'erase' ? 'url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjZmY2YjZiIiBzdHJva2Utd2lkdGg9IjIiLz48bGluZSB4MT0iMCIgeTE9IjAiIHgyPSIyNCIgeTI9IjI0IiBzdHJva2U9IiNmZjZiNmIiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==") 12 12, not-allowed' : 'default'
       }
     })
   );
