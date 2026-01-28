@@ -213,6 +213,7 @@ function WindowDesigner() {
         isOpen: true,
         onClose: handleCloseModal,
         currentHardware: state.hardware,
+        initialTab: modalData?.tab || 'HANDLES',
         onApply: handleHardwareApply
       }),
       

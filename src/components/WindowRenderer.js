@@ -147,41 +147,427 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
     return textureBackgrounds[paneGlass.texture] || textureBackgrounds['Clear'];
   };
   
-  // Draw opener indicator - Monkey tail / decorative handle style
+  // Get handle color from hardware settings
+  const getHandleColor = () => {
+    const handleName = hardware?.handleType || 'Connoisseur Antique Black';
+    const name = handleName.toLowerCase();
+    if (name.includes('chrome')) return { main: '#c0c0c0', highlight: '#e8e8e8', dark: '#808080' };
+    if (name.includes('gold')) return { main: '#d4af37', highlight: '#f0d060', dark: '#a08020' };
+    if (name.includes('graphite')) return { main: '#5a5a5a', highlight: '#7a7a7a', dark: '#3a3a3a' };
+    if (name.includes('satin')) return { main: '#b8b8b8', highlight: '#d8d8d8', dark: '#909090' };
+    if (name.includes('white')) return { main: '#f0f0f0', highlight: '#ffffff', dark: '#c8c8c8' };
+    if (name.includes('gunmetal')) return { main: '#505050', highlight: '#707070', dark: '#303030' };
+    return { main: '#2a2a2a', highlight: '#4a4a4a', dark: '#1a1a1a' }; // black default
+  };
+  
+  // Get handle style/type from hardware settings
+  const getHandleStyle = () => {
+    const handleName = hardware?.handleType || 'Connoisseur Antique Black';
+    const name = handleName.toLowerCase();
+    if (name.includes('sac') || name.includes('signature')) return 'sac-signature';
+    if (name.includes('teardrop')) return 'teardrop';
+    if (name.includes('ventiss designer')) return 'ventiss-designer';
+    if (name.includes('ventiss')) return 'ventiss';
+    if (name.includes('maxim inline')) return 'maxim-inline';
+    if (name.includes('maxim')) return 'maxim';
+    return 'connoisseur'; // default
+  };
+  
+  // Render SAC Signature handle - horizontal curved bar with circles at ends
+  const renderSACSignatureHandle = (handleColors, handleSize) => {
+    return React.createElement('svg', {
+      width: handleSize * 1.2,
+      height: handleSize * 0.5,
+      viewBox: '0 0 60 24',
+      style: { filter: 'drop-shadow(1px 2px 2px rgba(0,0,0,0.3))' }
+    },
+      // Left circle (mounting point)
+      React.createElement('circle', {
+        cx: '10',
+        cy: '12',
+        r: '6',
+        fill: handleColors.main,
+        stroke: handleColors.dark,
+        strokeWidth: '1'
+      }),
+      React.createElement('circle', {
+        cx: '8',
+        cy: '10',
+        r: '2',
+        fill: handleColors.highlight,
+        opacity: '0.6'
+      }),
+      // Curved bar
+      React.createElement('path', {
+        d: 'M 16 12 Q 30 6, 44 12',
+        fill: 'none',
+        stroke: handleColors.main,
+        strokeWidth: '5',
+        strokeLinecap: 'round'
+      }),
+      // Bar highlight
+      React.createElement('path', {
+        d: 'M 18 10 Q 30 5, 42 10',
+        fill: 'none',
+        stroke: handleColors.highlight,
+        strokeWidth: '1.5',
+        strokeLinecap: 'round',
+        opacity: '0.7'
+      }),
+      // Right circle (end point)
+      React.createElement('circle', {
+        cx: '50',
+        cy: '12',
+        r: '5',
+        fill: handleColors.main,
+        stroke: handleColors.dark,
+        strokeWidth: '1'
+      }),
+      React.createElement('circle', {
+        cx: '48',
+        cy: '10',
+        r: '1.5',
+        fill: handleColors.highlight,
+        opacity: '0.6'
+      })
+    );
+  };
+  
+  // Render Teardrop handle - curved with curl/teardrop end
+  const renderTeardropHandle = (handleColors, handleSize) => {
+    return React.createElement('svg', {
+      width: handleSize,
+      height: handleSize * 0.6,
+      viewBox: '0 0 50 30',
+      style: { filter: 'drop-shadow(1px 2px 2px rgba(0,0,0,0.3))' }
+    },
+      // Mounting plate
+      React.createElement('ellipse', {
+        cx: '10',
+        cy: '15',
+        rx: '7',
+        ry: '9',
+        fill: handleColors.main,
+        stroke: handleColors.dark,
+        strokeWidth: '1'
+      }),
+      React.createElement('ellipse', {
+        cx: '8',
+        cy: '12',
+        rx: '3',
+        ry: '4',
+        fill: handleColors.highlight,
+        opacity: '0.5'
+      }),
+      // Curved handle stem
+      React.createElement('path', {
+        d: 'M 16 15 Q 25 12, 32 8 Q 40 4, 45 10 Q 48 16, 42 20 Q 36 22, 35 18',
+        fill: 'none',
+        stroke: handleColors.main,
+        strokeWidth: '4',
+        strokeLinecap: 'round'
+      }),
+      // Highlight
+      React.createElement('path', {
+        d: 'M 18 13 Q 26 10, 33 7',
+        fill: 'none',
+        stroke: handleColors.highlight,
+        strokeWidth: '1.5',
+        strokeLinecap: 'round',
+        opacity: '0.6'
+      }),
+      // Teardrop curl end
+      React.createElement('circle', {
+        cx: '38',
+        cy: '18',
+        r: '4',
+        fill: handleColors.main,
+        stroke: handleColors.dark,
+        strokeWidth: '0.5'
+      })
+    );
+  };
+  
+  // Render Connoisseur handle - inline straight handle
+  const renderConnoisseurHandle = (handleColors, handleSize) => {
+    return React.createElement('svg', {
+      width: handleSize * 1.4,
+      height: handleSize * 0.35,
+      viewBox: '0 0 70 18',
+      style: { filter: 'drop-shadow(1px 2px 2px rgba(0,0,0,0.3))' }
+    },
+      // Mounting base (left)
+      React.createElement('ellipse', {
+        cx: '8',
+        cy: '9',
+        rx: '6',
+        ry: '7',
+        fill: handleColors.main,
+        stroke: handleColors.dark,
+        strokeWidth: '1'
+      }),
+      React.createElement('circle', {
+        cx: '6',
+        cy: '7',
+        r: '2',
+        fill: handleColors.highlight,
+        opacity: '0.5'
+      }),
+      // Handle bar - tapered
+      React.createElement('path', {
+        d: 'M 14 9 L 56 9',
+        stroke: handleColors.main,
+        strokeWidth: '6',
+        strokeLinecap: 'round'
+      }),
+      // Handle bar highlight
+      React.createElement('path', {
+        d: 'M 16 6 L 54 6',
+        stroke: handleColors.highlight,
+        strokeWidth: '1.5',
+        strokeLinecap: 'round',
+        opacity: '0.5'
+      }),
+      // Lever end (right) - slightly angled
+      React.createElement('ellipse', {
+        cx: '62',
+        cy: '9',
+        rx: '6',
+        ry: '5',
+        fill: handleColors.main,
+        stroke: handleColors.dark,
+        strokeWidth: '1'
+      })
+    );
+  };
+  
+  // Render Maxim handle - curved lever
+  const renderMaximHandle = (handleColors, handleSize) => {
+    return React.createElement('svg', {
+      width: handleSize * 1.3,
+      height: handleSize * 0.4,
+      viewBox: '0 0 65 20',
+      style: { filter: 'drop-shadow(1px 2px 2px rgba(0,0,0,0.3))' }
+    },
+      // Mounting circle
+      React.createElement('circle', {
+        cx: '8',
+        cy: '10',
+        r: '6',
+        fill: handleColors.main,
+        stroke: handleColors.dark,
+        strokeWidth: '1'
+      }),
+      React.createElement('circle', {
+        cx: '6',
+        cy: '8',
+        r: '2',
+        fill: handleColors.highlight,
+        opacity: '0.5'
+      }),
+      // Curved lever bar
+      React.createElement('path', {
+        d: 'M 14 10 Q 35 5, 58 10',
+        fill: 'none',
+        stroke: handleColors.main,
+        strokeWidth: '5',
+        strokeLinecap: 'round'
+      }),
+      // Highlight
+      React.createElement('path', {
+        d: 'M 16 7 Q 35 3, 56 7',
+        fill: 'none',
+        stroke: handleColors.highlight,
+        strokeWidth: '1.5',
+        strokeLinecap: 'round',
+        opacity: '0.5'
+      }),
+      // End cap
+      React.createElement('ellipse', {
+        cx: '58',
+        cy: '10',
+        rx: '5',
+        ry: '4',
+        fill: handleColors.main,
+        stroke: handleColors.dark,
+        strokeWidth: '0.5'
+      })
+    );
+  };
+  
+  // Render Ventiss 360 handle - L-shaped modern handle
+  const renderVentissHandle = (handleColors, handleSize) => {
+    return React.createElement('svg', {
+      width: handleSize * 0.8,
+      height: handleSize * 0.8,
+      viewBox: '0 0 40 40',
+      style: { filter: 'drop-shadow(1px 2px 2px rgba(0,0,0,0.3))' }
+    },
+      // Mounting plate
+      React.createElement('circle', {
+        cx: '10',
+        cy: '10',
+        r: '6',
+        fill: handleColors.main,
+        stroke: handleColors.dark,
+        strokeWidth: '1'
+      }),
+      React.createElement('circle', {
+        cx: '8',
+        cy: '8',
+        r: '2',
+        fill: handleColors.highlight,
+        opacity: '0.5'
+      }),
+      // Vertical part
+      React.createElement('path', {
+        d: 'M 10 16 L 10 32',
+        stroke: handleColors.main,
+        strokeWidth: '5',
+        strokeLinecap: 'round'
+      }),
+      // Horizontal part  
+      React.createElement('path', {
+        d: 'M 10 32 L 32 32',
+        stroke: handleColors.main,
+        strokeWidth: '5',
+        strokeLinecap: 'round'
+      }),
+      // Highlight on vertical
+      React.createElement('path', {
+        d: 'M 7 18 L 7 30',
+        stroke: handleColors.highlight,
+        strokeWidth: '1.5',
+        strokeLinecap: 'round',
+        opacity: '0.5'
+      }),
+      // End cap
+      React.createElement('ellipse', {
+        cx: '34',
+        cy: '32',
+        rx: '4',
+        ry: '3',
+        fill: handleColors.main,
+        stroke: handleColors.dark,
+        strokeWidth: '0.5'
+      })
+    );
+  };
+  
+  // Render Ventiss Designer handle - angular modern handle
+  const renderVentissDesignerHandle = (handleColors, handleSize) => {
+    return React.createElement('svg', {
+      width: handleSize * 1.0,
+      height: handleSize * 0.6,
+      viewBox: '0 0 50 30',
+      style: { filter: 'drop-shadow(1px 2px 2px rgba(0,0,0,0.3))' }
+    },
+      // Mounting base
+      React.createElement('circle', {
+        cx: '8',
+        cy: '15',
+        r: '5',
+        fill: handleColors.main,
+        stroke: handleColors.dark,
+        strokeWidth: '1'
+      }),
+      React.createElement('circle', {
+        cx: '6',
+        cy: '13',
+        r: '1.5',
+        fill: handleColors.highlight,
+        opacity: '0.5'
+      }),
+      // Angular lever - angled up then straight
+      React.createElement('path', {
+        d: 'M 13 15 L 22 8 L 45 8',
+        fill: 'none',
+        stroke: handleColors.main,
+        strokeWidth: '4',
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round'
+      }),
+      // Highlight
+      React.createElement('path', {
+        d: 'M 15 13 L 22 6 L 43 6',
+        fill: 'none',
+        stroke: handleColors.highlight,
+        strokeWidth: '1.2',
+        strokeLinecap: 'round',
+        opacity: '0.5'
+      }),
+      // End cap
+      React.createElement('ellipse', {
+        cx: '46',
+        cy: '8',
+        rx: '3',
+        ry: '2.5',
+        fill: handleColors.main,
+        stroke: handleColors.dark,
+        strokeWidth: '0.5'
+      })
+    );
+  };
+  
+  // Draw opener indicator - uses hardware handle type and style
   const renderOpenerIndicator = (pane, opener) => {
     if (!opener || opener.type === 'dummy' || opener.type === 'fixed') return null;
     
     const paneWidth = pane.width * scale;
     const paneHeight = pane.height * scale;
+    const handleColors = getHandleColor();
+    const handleStyle = getHandleStyle();
     
     // Calculate handle position and rotation based on opener type
     let handleX, handleY, rotation, flipY;
     
     if (opener.type.includes('side-hung')) {
       if (opener.hinge === 'left') {
-        // Hinge on left, handle on right edge
-        handleX = paneWidth - sashWidth - 12;
+        handleX = paneWidth - sashWidth - 15;
         handleY = paneHeight / 2;
         rotation = -90;
         flipY = false;
       } else {
-        // Hinge on right, handle on left edge
-        handleX = sashWidth + 12;
+        handleX = sashWidth + 15;
         handleY = paneHeight / 2;
         rotation = 90;
         flipY = true;
       }
     } else if (opener.type === 'top-hung') {
-      // Hinge on top, handle on bottom edge
       handleX = paneWidth / 2;
-      handleY = paneHeight - sashWidth - 12;
+      handleY = paneHeight - sashWidth - 15;
       rotation = 0;
       flipY = false;
     }
     
     // Scale handle size based on pane size
-    const handleScale = Math.min(1, Math.max(0.5, scale * 1.5));
-    const handleSize = 40 * handleScale;
+    const handleScale = Math.min(1.2, Math.max(0.6, scale * 1.5));
+    const handleSize = 45 * handleScale;
+    
+    // Select handle SVG based on style
+    let handleSVG;
+    switch (handleStyle) {
+      case 'sac-signature':
+        handleSVG = renderSACSignatureHandle(handleColors, handleSize);
+        break;
+      case 'teardrop':
+        handleSVG = renderTeardropHandle(handleColors, handleSize);
+        break;
+      case 'ventiss':
+        handleSVG = renderVentissHandle(handleColors, handleSize);
+        break;
+      case 'ventiss-designer':
+        handleSVG = renderVentissDesignerHandle(handleColors, handleSize);
+        break;
+      case 'maxim':
+      case 'maxim-inline':
+        handleSVG = renderMaximHandle(handleColors, handleSize);
+        break;
+      case 'connoisseur':
+      default:
+        handleSVG = renderConnoisseurHandle(handleColors, handleSize);
+        break;
+    }
     
     return React.createElement('div', {
       className: 'opener-handle',
@@ -192,58 +578,7 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
         transform: `translate(-50%, -50%) rotate(${rotation}deg) ${flipY ? 'scaleX(-1)' : ''}`,
         zIndex: 10
       }
-    },
-      // Monkey tail handle SVG - decorative traditional style
-      React.createElement('svg', {
-        width: handleSize,
-        height: handleSize * 0.6,
-        viewBox: '0 0 50 30',
-        style: { filter: 'drop-shadow(2px 2px 2px rgba(0,0,0,0.4))' }
-      },
-        // Handle mounting plate (escutcheon)
-        React.createElement('ellipse', {
-          cx: '10',
-          cy: '15',
-          rx: '8',
-          ry: '10',
-          fill: '#3a3a3a',
-          stroke: '#2a2a2a',
-          strokeWidth: '1'
-        }),
-        // Plate highlight
-        React.createElement('ellipse', {
-          cx: '8',
-          cy: '12',
-          rx: '4',
-          ry: '5',
-          fill: '#5a5a5a',
-          opacity: '0.5'
-        }),
-        // Handle stem
-        React.createElement('path', {
-          d: 'M 16 15 Q 25 15, 32 10 Q 38 6, 42 8 Q 48 12, 45 18 Q 42 24, 35 22 Q 30 20, 28 15',
-          fill: 'none',
-          stroke: '#2a2a2a',
-          strokeWidth: '4',
-          strokeLinecap: 'round'
-        }),
-        // Handle stem highlight
-        React.createElement('path', {
-          d: 'M 17 14 Q 24 14, 30 10 Q 35 7, 40 9',
-          fill: 'none',
-          stroke: '#5a5a5a',
-          strokeWidth: '1.5',
-          strokeLinecap: 'round'
-        }),
-        // Curl end
-        React.createElement('circle', {
-          cx: '35',
-          cy: '20',
-          r: '3',
-          fill: '#2a2a2a'
-        })
-      )
-    );
+    }, handleSVG);
   };
   
   // Render glazing bars

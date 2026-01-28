@@ -371,28 +371,41 @@ function GlazingPanel({ onOpenModal }) {
 
 /**
  * HardwarePanel Component
- * Panel for hardware settings
+ * Panel for hardware settings - consistent layout with other panels
  */
 function HardwarePanel({ onOpenModal }) {
   const { state } = useWindow();
   const { hardware } = state;
   
-  const hardwareOptions = [
-    { 
-      id: 'handle', 
-      name: 'Handle Type', 
-      icon: '⊶', 
-      value: hardware.handleType,
-      description: hardware.handleType || 'Connoisseur Antique Black'
-    },
-    { 
-      id: 'ventilation', 
-      name: 'Ventilation', 
-      icon: '≡', 
-      value: hardware.ventilation,
-      description: hardware.ventilation || 'None selected'
-    },
-  ];
+  // Map handle names to colors for preview
+  const getHandleColor = (handleName) => {
+    if (!handleName) return '#1a1a1a';
+    const name = handleName.toLowerCase();
+    if (name.includes('chrome')) return '#c0c0c0';
+    if (name.includes('gold')) return '#d4af37';
+    if (name.includes('graphite')) return '#5a5a5a';
+    if (name.includes('satin')) return '#b8b8b8';
+    if (name.includes('white')) return '#f5f5f5';
+    if (name.includes('gunmetal')) return '#505050';
+    return '#1a1a1a'; // black default
+  };
+  
+  const handleColor = getHandleColor(hardware.handleType);
+  const hasVentilation = hardware.ventilation && hardware.ventilation !== 'none';
+  
+  const ventilationNames = {
+    'none': 'No Ventilation',
+    'trickle-vent': 'Trickle Vent',
+    'night-vent': 'Night Vent Restrictor',
+    'egress-hinges': 'Egress Hinges'
+  };
+  
+  const ventilationIcons = {
+    'none': '✕',
+    'trickle-vent': '≡',
+    'night-vent': '☾',
+    'egress-hinges': '⬚'
+  };
   
   return React.createElement('div', { className: 'panel hardware-panel' },
     React.createElement('div', { className: 'panel-header' },
@@ -401,30 +414,65 @@ function HardwarePanel({ onOpenModal }) {
     ),
     
     React.createElement('div', { className: 'extras-list' },
-      hardwareOptions.map((option) => {
-        const hasValue = option.value && option.value !== 'None';
-        return React.createElement('div', {
-          key: option.id,
-          className: `extra-item ${hasValue ? 'enabled' : 'disabled'}`,
-          onClick: () => onOpenModal('hardware')
-        },
-          React.createElement('div', { className: 'extra-item-icon' },
-            React.createElement('span', { className: 'icon' }, option.icon)
+      // Handle Type Item
+      React.createElement('div', {
+        className: 'extra-item enabled',
+        onClick: () => onOpenModal('hardware', { tab: 'HANDLES' })
+      },
+        React.createElement('div', { className: 'extra-item-icon' },
+          // Mini handle SVG
+          React.createElement('svg', {
+            width: '32',
+            height: '32',
+            viewBox: '0 0 50 50',
+            style: { display: 'block' }
+          },
+            React.createElement('ellipse', { cx: '12', cy: '28', rx: '8', ry: '8', fill: handleColor, stroke: '#333', strokeWidth: '0.5' }),
+            React.createElement('path', {
+              d: 'M 18 26 Q 28 22, 38 20 Q 44 18, 46 24 Q 47 28, 44 30',
+              fill: 'none',
+              stroke: handleColor,
+              strokeWidth: '4',
+              strokeLinecap: 'round'
+            }),
+            React.createElement('circle', { cx: '43', cy: '28', r: '3', fill: handleColor })
+          )
+        ),
+        React.createElement('div', { className: 'extra-item-content' },
+          React.createElement('div', { className: 'extra-label-row' },
+            React.createElement('span', { className: 'extra-label' }, 'Handle Type'),
+            React.createElement('span', { className: 'toggle-indicator on' }, 'SET')
           ),
-          React.createElement('div', { className: 'extra-item-content' },
-            React.createElement('div', { className: 'extra-label-row' },
-              React.createElement('span', { className: 'extra-label' }, option.name),
-              React.createElement('span', { 
-                className: `toggle-indicator ${hasValue ? 'on' : 'off'}` 
-              }, hasValue ? 'SET' : 'NOT SET')
-            ),
-            React.createElement('span', { className: 'extra-description' },
-              option.description
-            )
+          React.createElement('span', { className: 'extra-description' },
+            hardware.handleType || 'Connoisseur Antique Black'
+          )
+        ),
+        React.createElement('button', { className: 'extra-edit-btn' }, '›')
+      ),
+      
+      // Ventilation Item
+      React.createElement('div', {
+        className: `extra-item ${hasVentilation ? 'enabled' : 'disabled'}`,
+        onClick: () => onOpenModal('hardware', { tab: 'VENTILATION' })
+      },
+        React.createElement('div', { className: 'extra-item-icon' },
+          React.createElement('span', { className: 'icon' }, 
+            ventilationIcons[hardware.ventilation] || '✕'
+          )
+        ),
+        React.createElement('div', { className: 'extra-item-content' },
+          React.createElement('div', { className: 'extra-label-row' },
+            React.createElement('span', { className: 'extra-label' }, 'Ventilation'),
+            React.createElement('span', { 
+              className: `toggle-indicator ${hasVentilation ? 'on' : 'off'}` 
+            }, hasVentilation ? 'ENABLED' : 'NONE')
           ),
-          React.createElement('button', { className: 'extra-edit-btn' }, '›')
-        );
-      })
+          React.createElement('span', { className: 'extra-description' },
+            ventilationNames[hardware.ventilation] || 'No ventilation selected'
+          )
+        ),
+        React.createElement('button', { className: 'extra-edit-btn' }, '›')
+      )
     )
   );
 }
