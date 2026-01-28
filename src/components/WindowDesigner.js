@@ -291,7 +291,7 @@ function WindowDesigner() {
             React.createElement('div', { className: 'section-label' }, 'Live Preview'),
             React.createElement('div', { className: 'live-window-preview' },
               React.createElement(WindowRenderer, {
-                scale: 0.6,
+                scale: 1.0,
                 interactive: true,
                 showDimensions: true
               })

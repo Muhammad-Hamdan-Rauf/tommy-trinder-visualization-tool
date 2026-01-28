@@ -216,6 +216,20 @@ function GlassPanel({ onOpenModal }) {
       React.createElement('p', { className: 'panel-subtitle' }, 'Configure glass specifications for each pane')
     ),
     
+    // Default glass settings
+    React.createElement('div', { className: 'default-settings-card', style: { 
+      background: '#f8f9fa', 
+      padding: '12px', 
+      borderRadius: '8px', 
+      marginBottom: '16px',
+      border: '1px solid #e9ecef'
+    } },
+      React.createElement('div', { style: { fontSize: '12px', color: '#6c757d', marginBottom: '4px' } }, 'Default Glass'),
+      React.createElement('div', { style: { fontSize: '14px', fontWeight: '600', color: '#333' } }, 
+        `${defaultGlass.paneType || 'Double Glazed'} • ${defaultGlass.texture || 'Clear'}`
+      )
+    ),
+    
     React.createElement('div', { className: 'extras-list' },
       panes.map((pane) => {
         const paneGlass = glass[pane.id] || defaultGlass;

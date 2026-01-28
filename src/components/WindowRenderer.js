@@ -39,7 +39,7 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
   const defaultGlass = glass.default || {};
   const glassTexture = defaultGlass.texture || 'Clear';
   
-  // Get glass background based on texture and preview state - realistic sky
+  // Get glass background based on texture and preview state - realistic textures
   const getGlassBackground = (paneId) => {
     const paneGlass = glass[paneId] || defaultGlass;
     
@@ -47,19 +47,101 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
       return `url(${preview.backgroundImage})`;
     }
     
-    // Texture backgrounds - more realistic sky gradient
+    // Realistic texture backgrounds like TommyTrinder
     const textureBackgrounds = {
+      // Clear glass - realistic sky gradient
       'Clear': `linear-gradient(180deg, 
-        #4A90D9 0%, 
-        #6BA3E0 15%, 
-        #87CEEB 35%, 
-        #B0E0F0 55%, 
-        #C5E8F5 75%, 
-        #E0F4FF 100%)`,
-      'Arctic': 'linear-gradient(135deg, #d0d5d9 0%, #e8ebee 50%, #d0d5d9 100%)',
-      'Contora': 'repeating-linear-gradient(90deg, #c5c8cb 0px, #d8dadc 2px, #c5c8cb 4px)',
-      'Chantilly': 'radial-gradient(circle, #e0e0e0 1px, #dcdcdc 1px)',
-      'Cotswold': 'linear-gradient(45deg, #c9c0b5 25%, #d5ccc1 50%, #c9c0b5 75%)',
+        #3a7ab8 0%, 
+        #4a90d9 12%, 
+        #6ba8e5 28%, 
+        #87ceeb 45%, 
+        #a8daf0 62%,
+        #c5e8f5 78%, 
+        #e0f4ff 100%)`,
+      
+      // Arctic - frosted/obscured with white tint
+      'Arctic': `linear-gradient(180deg, 
+        rgba(208, 213, 217, 0.95) 0%, 
+        rgba(232, 235, 238, 0.9) 50%, 
+        rgba(208, 213, 217, 0.95) 100%)`,
+      
+      // Contora - vertical reeded pattern
+      'Contora': `repeating-linear-gradient(90deg, 
+        rgba(190, 195, 200, 0.9) 0px, 
+        rgba(220, 225, 230, 0.85) 3px, 
+        rgba(190, 195, 200, 0.9) 6px)`,
+      
+      // Chantilly - lace/floral frosted pattern
+      'Chantilly': `radial-gradient(circle at 25% 25%, rgba(240,240,240,0.95) 2px, transparent 2px),
+        radial-gradient(circle at 75% 75%, rgba(240,240,240,0.95) 2px, transparent 2px),
+        radial-gradient(circle at 50% 50%, rgba(230,230,230,0.9) 3px, transparent 3px),
+        linear-gradient(180deg, #dcdcdc 0%, #e8e8e8 50%, #dcdcdc 100%)`,
+      
+      // Charcoal Sticks - dark reeded glass
+      'Charcoal Sticks': `repeating-linear-gradient(90deg, 
+        rgba(110, 110, 110, 0.95) 0px, 
+        rgba(140, 140, 140, 0.9) 4px, 
+        rgba(110, 110, 110, 0.95) 8px)`,
+      
+      // Everglade - green tinted frosted
+      'Everglade': `linear-gradient(180deg, 
+        rgba(160, 180, 160, 0.9) 0%, 
+        rgba(184, 197, 184, 0.85) 50%, 
+        rgba(160, 180, 160, 0.9) 100%)`,
+      
+      // Cotswold - warm amber/honey tinted
+      'Cotswold': `linear-gradient(135deg, 
+        rgba(201, 192, 181, 0.95) 0%, 
+        rgba(213, 204, 193, 0.9) 25%, 
+        rgba(225, 216, 205, 0.85) 50%, 
+        rgba(213, 204, 193, 0.9) 75%, 
+        rgba(201, 192, 181, 0.95) 100%)`,
+      
+      // Digital - modern geometric frosted
+      'Digital': `linear-gradient(45deg, 
+        rgba(168, 168, 168, 0.9) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(168, 168, 168, 0.9) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(168, 168, 168, 0.9) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(168, 168, 168, 0.9) 75%),
+        linear-gradient(180deg, #b0b0b0 0%, #c8c8c8 100%)`,
+      
+      // Mayflower - floral frosted pattern
+      'Mayflower': `radial-gradient(circle at 30% 30%, rgba(213, 208, 200, 0.95) 5px, transparent 5px),
+        radial-gradient(circle at 70% 70%, rgba(213, 208, 200, 0.95) 5px, transparent 5px),
+        linear-gradient(180deg, #d5d0c8 0%, #e0dbd3 50%, #d5d0c8 100%)`,
+      
+      // Flemish - wavy distorted pattern
+      'Flemish': `repeating-linear-gradient(180deg, 
+        rgba(204, 200, 192, 0.95) 0px, 
+        rgba(224, 220, 212, 0.9) 8px, 
+        rgba(204, 200, 192, 0.95) 16px)`,
+      
+      // Minster - traditional cathedral pattern
+      'Minster': `radial-gradient(ellipse at 50% 0%, rgba(200, 196, 188, 0.95) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 100%, rgba(200, 196, 188, 0.95) 0%, transparent 50%),
+        linear-gradient(180deg, #c8c4bc 0%, #d8d4cc 50%, #c8c4bc 100%)`,
+      
+      // Oak - warm wood-tinted frosted
+      'Oak': `linear-gradient(180deg, 
+        rgba(181, 165, 144, 0.95) 0%, 
+        rgba(197, 181, 160, 0.9) 50%, 
+        rgba(181, 165, 144, 0.95) 100%)`,
+      
+      // Satin - smooth frosted white
+      'Satin': `linear-gradient(180deg, 
+        rgba(240, 240, 245, 0.95) 0%, 
+        rgba(250, 250, 255, 0.9) 50%, 
+        rgba(240, 240, 245, 0.95) 100%)`,
+      
+      // Stippolyte - fine stippled pattern  
+      'Stippolyte': `radial-gradient(circle at 2px 2px, rgba(200,200,200,0.8) 1px, transparent 1px),
+        linear-gradient(180deg, #d0d0d0 0%, #e0e0e0 100%)`,
+      
+      // Taffeta - silk-like smooth frosted
+      'Taffeta': `linear-gradient(135deg, 
+        rgba(220, 220, 225, 0.95) 0%, 
+        rgba(235, 235, 240, 0.9) 50%, 
+        rgba(220, 220, 225, 0.95) 100%)`,
     };
     
     return textureBackgrounds[paneGlass.texture] || textureBackgrounds['Clear'];

@@ -31,18 +31,21 @@ function GlassModal({ isOpen, onClose, paneId, currentGlass, onApply, onApplyToA
   ];
   
   const textures = [
-    { id: 'clear', name: 'Clear', preview: 'linear-gradient(135deg, #e8e8e8 0%, #f8f8f8 50%, #e0e0e0 100%)' },
-    { id: 'arctic', name: 'Arctic', preview: '#d0d5d9' },
-    { id: 'contora', name: 'Contora', preview: '#c5c8cb' },
-    { id: 'chantilly', name: 'Chantilly', preview: '#dcdcdc' },
-    { id: 'charcoal-sticks', name: 'Charcoal Sticks', preview: '#8a8a8a' },
-    { id: 'everglade', name: 'Everglade', preview: '#b8c5b8' },
-    { id: 'cotswold', name: 'Cotswold', preview: '#c9c0b5' },
-    { id: 'digital', name: 'Digital', preview: '#a8a8a8' },
-    { id: 'mayflower', name: 'Mayflower', preview: '#d5d0c8' },
-    { id: 'flemish', name: 'Flemish', preview: '#ccc8c0' },
-    { id: 'minster', name: 'Minster', preview: '#c8c4bc' },
-    { id: 'oak', name: 'Oak', preview: '#b5a590' },
+    { id: 'clear', name: 'Clear', preview: 'linear-gradient(180deg, #4a90d9 0%, #87ceeb 50%, #e0f4ff 100%)', description: 'Standard clear glass' },
+    { id: 'arctic', name: 'Arctic', preview: 'linear-gradient(180deg, #d0d5d9 0%, #e8ebee 50%, #d0d5d9 100%)', description: 'Frosted white' },
+    { id: 'contora', name: 'Contora', preview: 'repeating-linear-gradient(90deg, #bec3c8 0px, #dce1e6 3px, #bec3c8 6px)', description: 'Vertical reeded' },
+    { id: 'chantilly', name: 'Chantilly', preview: 'radial-gradient(circle, #f0f0f0 2px, #dcdcdc 2px)', description: 'Lace pattern' },
+    { id: 'charcoal-sticks', name: 'Charcoal Sticks', preview: 'repeating-linear-gradient(90deg, #6e6e6e 0px, #8c8c8c 4px, #6e6e6e 8px)', description: 'Dark reeded' },
+    { id: 'everglade', name: 'Everglade', preview: 'linear-gradient(180deg, #a0b4a0 0%, #b8c5b8 50%, #a0b4a0 100%)', description: 'Green tinted' },
+    { id: 'cotswold', name: 'Cotswold', preview: 'linear-gradient(135deg, #c9c0b5 0%, #e1d8cd 50%, #c9c0b5 100%)', description: 'Warm honey' },
+    { id: 'digital', name: 'Digital', preview: 'linear-gradient(45deg, #a8a8a8 25%, #c8c8c8 50%, #a8a8a8 75%)', description: 'Modern geometric' },
+    { id: 'mayflower', name: 'Mayflower', preview: 'radial-gradient(circle at 30% 30%, #d5d0c8 5px, #e0dbd3 5px)', description: 'Floral pattern' },
+    { id: 'flemish', name: 'Flemish', preview: 'repeating-linear-gradient(180deg, #ccc8c0 0px, #e0dcd4 8px, #ccc8c0 16px)', description: 'Wavy distorted' },
+    { id: 'minster', name: 'Minster', preview: 'radial-gradient(ellipse at 50% 0%, #c8c4bc 0%, #d8d4cc 50%, #c8c4bc 100%)', description: 'Cathedral style' },
+    { id: 'oak', name: 'Oak', preview: 'linear-gradient(180deg, #b5a590 0%, #c5b5a0 50%, #b5a590 100%)', description: 'Wood tinted' },
+    { id: 'satin', name: 'Satin', preview: 'linear-gradient(180deg, #f0f0f5 0%, #fafaff 50%, #f0f0f5 100%)', description: 'Smooth frosted' },
+    { id: 'stippolyte', name: 'Stippolyte', preview: 'radial-gradient(circle at 2px 2px, #c8c8c8 1px, #e0e0e0 1px)', description: 'Fine stippled' },
+    { id: 'taffeta', name: 'Taffeta', preview: 'linear-gradient(135deg, #dcdce1 0%, #ebebf0 50%, #dcdce1 100%)', description: 'Silk-like' },
   ];
   
   const spacerBars = ['Black', 'Grey', 'White', 'Chrome'];
@@ -110,9 +113,13 @@ function GlassModal({ isOpen, onClose, paneId, currentGlass, onApply, onApplyToA
         },
           React.createElement('div', {
             className: 'texture-preview',
-            style: { background: tex.preview }
+            style: { 
+              background: tex.preview,
+              backgroundSize: tex.id === 'stippolyte' || tex.id === 'chantilly' ? '4px 4px' : 'cover'
+            }
           }),
-          React.createElement('span', { className: 'texture-name' }, tex.name)
+          React.createElement('span', { className: 'texture-name' }, tex.name),
+          React.createElement('span', { className: 'texture-description' }, tex.description)
         )
       )
     );
