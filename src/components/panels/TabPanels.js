@@ -77,7 +77,7 @@ function OpenersPanel({ onOpenModal }) {
  * Panel for window profile settings
  */
 function ProfilePanel({ onOpenModal }) {
-  const { state } = useWindow();
+  const { state, actions } = useWindow();
   
   const profiles = [
     { id: 'flush-casement', name: 'Flush Casement', icon: '▭', description: 'Modern flush sash design' },
@@ -86,6 +86,10 @@ function ProfilePanel({ onOpenModal }) {
   ];
   
   const currentProfile = state.productType.toLowerCase().replace(' ', '-');
+  
+  const handleProfileSelect = (profile) => {
+    actions.setProductInfo({ productType: profile.name });
+  };
   
   return React.createElement('div', { className: 'panel profile-panel' },
     React.createElement('div', { className: 'panel-header' },
@@ -99,7 +103,7 @@ function ProfilePanel({ onOpenModal }) {
         return React.createElement('div', {
           key: profile.id,
           className: `extra-item ${isSelected ? 'enabled' : 'disabled'}`,
-          onClick: () => {}
+          onClick: () => handleProfileSelect(profile)
         },
           React.createElement('div', { className: 'extra-item-icon' },
             React.createElement('span', { className: 'icon' }, profile.icon)

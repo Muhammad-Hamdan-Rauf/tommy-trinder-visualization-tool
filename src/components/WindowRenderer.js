@@ -194,6 +194,64 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
     return React.createElement('div', { className: 'glazing-bars-container' }, bars);
   };
   
+  // Get sash frame style based on profile type
+  const getSashFrameStyle = () => {
+    const baseStyle = {
+      position: 'absolute',
+      inset: 0,
+      border: `${sashWidth}px solid ${sashColor}`,
+      boxSizing: 'border-box',
+      background: `linear-gradient(135deg, ${sashColor} 0%, ${adjustBrightness(sashColor, -10)} 100%)`
+    };
+    
+    // Profile-specific styling
+    const profileType = state.productType.toLowerCase();
+    
+    if (profileType.includes('flush')) {
+      // Flush Casement - flat, modern, minimal shadows
+      return {
+        ...baseStyle,
+        boxShadow: `
+          inset 0 2px 4px rgba(255,255,255,0.6),
+          inset 0 -2px 4px rgba(0,0,0,0.15),
+          inset 2px 0 4px rgba(255,255,255,0.4),
+          inset -2px 0 4px rgba(0,0,0,0.1),
+          0 2px 8px rgba(0,0,0,0.2)
+        `,
+        borderRadius: '3px'
+      };
+    } else if (profileType.includes('sculptured')) {
+      // Sculptured - rounded, ornate with more depth
+      return {
+        ...baseStyle,
+        boxShadow: `
+          inset 0 3px 6px rgba(255,255,255,0.7),
+          inset 0 -3px 6px rgba(0,0,0,0.25),
+          inset 3px 0 6px rgba(255,255,255,0.5),
+          inset -3px 0 6px rgba(0,0,0,0.2),
+          0 3px 12px rgba(0,0,0,0.3)
+        `,
+        borderRadius: '8px', // More rounded for sculptured look
+        border: `${sashWidth}px ridge ${sashColor}`, // Ridge border for 3D effect
+      };
+    } else if (profileType.includes('chamfered')) {
+      // Chamfered - angular, beveled edges
+      return {
+        ...baseStyle,
+        boxShadow: `
+          inset 2px 2px 4px rgba(255,255,255,0.7),
+          inset -2px -2px 4px rgba(0,0,0,0.3),
+          0 2px 8px rgba(0,0,0,0.25)
+        `,
+        borderRadius: '2px', // Sharper corners for chamfered look
+        borderStyle: 'solid',
+        borderImage: `linear-gradient(135deg, ${adjustBrightness(sashColor, 15)} 0%, ${sashColor} 50%, ${adjustBrightness(sashColor, -15)} 100%) 1`
+      };
+    }
+    
+    return baseStyle;
+  };
+  
   // Render individual pane
   const renderPane = (pane, index) => {
     const opener = openers[pane.id];
@@ -215,21 +273,7 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
       // Sash frame
       React.createElement('div', {
         className: 'sash-frame',
-        style: {
-          position: 'absolute',
-          inset: 0,
-          border: `${sashWidth}px solid ${sashColor}`,
-          boxShadow: `
-            inset 0 2px 4px rgba(255,255,255,0.6),
-            inset 0 -2px 4px rgba(0,0,0,0.15),
-            inset 2px 0 4px rgba(255,255,255,0.4),
-            inset -2px 0 4px rgba(0,0,0,0.1),
-            0 2px 8px rgba(0,0,0,0.2)
-          `,
-          borderRadius: '3px',
-          boxSizing: 'border-box',
-          background: `linear-gradient(135deg, ${sashColor} 0%, ${adjustBrightness(sashColor, -10)} 100%)`
-        }
+        style: getSashFrameStyle()
       }),
       
       // Glass
@@ -412,16 +456,21 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
     if (!extras.cill.enabled) return null;
     
     const cillHeight = 20 * scale;
-    const cillExtension = (extras.cill.leftHorn || 50) * scale;
+    const leftHorn = (extras.cill.leftHorn || 50) * scale;
+    const rightHorn = (extras.cill.rightHorn || 50) * scale;
     const cillColor = finish.cill?.colorHex || finish.frame.colorHex || '#f8f6f0';
+    
+    // Container width is scaledWidth + frameWidth * 2
+    // Cill should extend beyond the container by the horn amounts
+    const containerWidth = scaledWidth + frameWidth * 2;
     
     return React.createElement('div', {
       className: 'window-cill',
       style: {
         position: 'absolute',
         bottom: -cillHeight,
-        left: -(cillExtension + frameWidth),
-        width: scaledWidth + frameWidth * 2 + cillExtension * 2,
+        left: -leftHorn,
+        width: containerWidth + leftHorn + rightHorn,
         height: cillHeight,
         background: `linear-gradient(180deg, ${cillColor} 0%, ${adjustBrightness(cillColor, -20)} 100%)`,
         boxShadow: `
@@ -481,6 +530,60 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
     );
   }
   
+  // Get main frame style based on profile type
+  const getMainFrameStyle = () => {
+    const baseStyle = {
+      position: 'absolute',
+      inset: 0,
+      background: `linear-gradient(145deg, ${frameColor} 0%, ${adjustBrightness(frameColor, -8)} 100%)`,
+      border: '2px solid rgba(0,0,0,0.1)'
+    };
+    
+    const profileType = state.productType.toLowerCase();
+    
+    if (profileType.includes('flush')) {
+      // Flush Casement - clean, minimal
+      return {
+        ...baseStyle,
+        boxShadow: `
+          0 8px 32px rgba(0,0,0,0.25),
+          0 4px 12px rgba(0,0,0,0.15),
+          inset 0 2px 4px rgba(255,255,255,0.3),
+          inset 0 -2px 4px rgba(0,0,0,0.2)
+        `,
+        borderRadius: '4px'
+      };
+    } else if (profileType.includes('sculptured')) {
+      // Sculptured - rounded, deeper shadows
+      return {
+        ...baseStyle,
+        boxShadow: `
+          0 10px 40px rgba(0,0,0,0.3),
+          0 6px 16px rgba(0,0,0,0.2),
+          inset 0 3px 6px rgba(255,255,255,0.4),
+          inset 0 -3px 6px rgba(0,0,0,0.25)
+        `,
+        borderRadius: '12px', // More rounded
+        border: '3px ridge rgba(0,0,0,0.15)' // Ridge effect
+      };
+    } else if (profileType.includes('chamfered')) {
+      // Chamfered - angular, beveled
+      return {
+        ...baseStyle,
+        boxShadow: `
+          0 8px 32px rgba(0,0,0,0.3),
+          0 4px 12px rgba(0,0,0,0.2),
+          inset 2px 2px 6px rgba(255,255,255,0.4),
+          inset -2px -2px 6px rgba(0,0,0,0.25)
+        `,
+        borderRadius: '3px', // Sharper corners
+        border: '2px solid rgba(0,0,0,0.15)'
+      };
+    }
+    
+    return baseStyle;
+  };
+  
   return React.createElement('div', {
     className: 'window-renderer',
     style: {
@@ -493,19 +596,7 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
     // Main frame (outer border)
     React.createElement('div', {
       className: 'window-frame',
-      style: {
-        position: 'absolute',
-        inset: 0,
-        background: `linear-gradient(145deg, ${frameColor} 0%, ${adjustBrightness(frameColor, -8)} 100%)`,
-        boxShadow: `
-          0 8px 32px rgba(0,0,0,0.25),
-          0 4px 12px rgba(0,0,0,0.15),
-          inset 0 2px 4px rgba(255,255,255,0.3),
-          inset 0 -2px 4px rgba(0,0,0,0.2)
-        `,
-        borderRadius: '4px',
-        border: '2px solid rgba(0,0,0,0.1)'
-      }
+      style: getMainFrameStyle()
     }),
     
     // Inner frame area (where panes sit)
