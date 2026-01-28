@@ -270,17 +270,68 @@ function GlazingPanel({ onOpenModal }) {
   
   const glazingTypes = [
     { id: 'None', name: 'None', icon: '□', description: 'No glazing bars' },
-    { id: 'Astragal', name: 'Astragal', icon: '⊞', description: 'Traditional astragal bars' },
-    { id: 'Georgian', name: 'Georgian', icon: '⊠', description: 'Classic Georgian style' },
-    { id: 'Leaded', name: 'Leaded', icon: '⊡', description: 'Decorative leaded design' },
+    { id: 'Astragal', name: 'Astragal', icon: '⊞', description: 'Surface-applied bars for traditional look' },
+    { id: 'Georgian', name: 'Georgian', icon: '⊠', description: 'Internal muntin bars dividing glass' },
+    { id: 'Leaded', name: 'Leaded', icon: '⊡', description: 'Decorative lead strips joining glass' },
   ];
   
   const currentType = glazing.type || 'None';
+  
+  // Get description for current glazing settings
+  const getGlazingDescription = (type) => {
+    if (type.id === 'None') return type.description;
+    if (currentType !== type.id) return type.description;
+    
+    const hBars = glazing.horizontalBars || 0;
+    const vBars = glazing.verticalBars || 0;
+    
+    let desc = `${hBars}H × ${vBars}V bars`;
+    if (glazing.barProfile) desc += ` • ${glazing.barProfile}`;
+    if (type.id === 'Leaded' && glazing.leadColor) {
+      desc = `${hBars}H × ${vBars}V • ${glazing.jointType || 'Soldered'}`;
+    }
+    return desc;
+  };
   
   return React.createElement('div', { className: 'panel glazing-panel' },
     React.createElement('div', { className: 'panel-header' },
       React.createElement('h3', null, 'Glazing Bars'),
       React.createElement('p', { className: 'panel-subtitle' }, 'Add decorative glazing bar patterns')
+    ),
+    
+    // Current glazing info card if selected
+    currentType !== 'None' && React.createElement('div', { 
+      className: 'current-glazing-card',
+      style: { 
+        background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)', 
+        padding: '14px', 
+        borderRadius: '8px', 
+        marginBottom: '16px',
+        border: '1px solid #dee2e6'
+      }
+    },
+      React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
+        React.createElement('div', null,
+          React.createElement('div', { style: { fontSize: '11px', color: '#6c757d', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' } }, 'Current Style'),
+          React.createElement('div', { style: { fontSize: '15px', fontWeight: '600', color: '#333' } }, currentType),
+          React.createElement('div', { style: { fontSize: '12px', color: '#666', marginTop: '2px' } }, 
+            `${glazing.horizontalBars || 0} horizontal • ${glazing.verticalBars || 0} vertical`
+          )
+        ),
+        React.createElement('button', {
+          style: {
+            background: '#2ecc71',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            fontSize: '12px',
+            fontWeight: '600',
+            cursor: 'pointer'
+          },
+          onClick: () => onOpenModal('glazing', { type: currentType })
+        }, 'Edit')
+      )
     ),
     
     React.createElement('div', { className: 'extras-list' },
@@ -291,7 +342,7 @@ function GlazingPanel({ onOpenModal }) {
           className: `extra-item ${isSelected ? 'enabled' : 'disabled'}`,
           onClick: () => {
             if (type.id === 'None') {
-              actions.setGlazing({ type: null });
+              actions.setGlazing({ type: null, horizontalBars: 0, verticalBars: 0 });
             } else {
               onOpenModal('glazing', { type: type.id });
             }
@@ -308,12 +359,10 @@ function GlazingPanel({ onOpenModal }) {
               }, isSelected ? 'ACTIVE' : 'SELECT')
             ),
             React.createElement('span', { className: 'extra-description' },
-              isSelected && type.id !== 'None' 
-                ? `${glazing.barProfile || 'Standard'} • ${glazing.backToBack ? 'Back to Back' : 'Single Side'}`
-                : type.description
+              getGlazingDescription(type)
             )
           ),
-          React.createElement('button', { className: 'extra-edit-btn' }, '›')
+          type.id !== 'None' && React.createElement('button', { className: 'extra-edit-btn' }, '›')
         );
       })
     )

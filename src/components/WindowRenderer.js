@@ -252,50 +252,114 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
     
     const paneWidth = (pane.width * scale) - sashWidth * 2;
     const paneHeight = (pane.height * scale) - sashWidth * 2;
-    const barWidth = 4 * scale;
+    const barWidth = glazing.type === 'Leaded' ? 2 * scale : 4 * scale;
     
-    // For Astragal/Georgian - create grid pattern
+    // Get bar counts from glazing settings
+    const hBars = glazing.horizontalBars || 1;
+    const vBars = glazing.verticalBars || 1;
+    
     const bars = [];
     
     if (glazing.type === 'Astragal' || glazing.type === 'Georgian') {
-      // Vertical bars (2 for 3-column look)
-      const vBarSpacing = paneWidth / 3;
-      for (let i = 1; i < 3; i++) {
-        bars.push(
-          React.createElement('div', {
-            key: `v-${i}`,
-            className: 'glazing-bar vertical',
-            style: {
-              position: 'absolute',
-              left: vBarSpacing * i - barWidth / 2,
-              top: 0,
-              width: barWidth,
-              height: paneHeight,
-              backgroundColor: sashColor,
-              boxShadow: '0 0 2px rgba(0,0,0,0.2)'
-            }
-          })
-        );
+      // Vertical bars
+      if (vBars > 0) {
+        const vBarSpacing = paneWidth / (vBars + 1);
+        for (let i = 1; i <= vBars; i++) {
+          bars.push(
+            React.createElement('div', {
+              key: `v-${i}`,
+              className: 'glazing-bar vertical',
+              style: {
+                position: 'absolute',
+                left: vBarSpacing * i - barWidth / 2,
+                top: 0,
+                width: barWidth,
+                height: paneHeight,
+                backgroundColor: sashColor,
+                boxShadow: `
+                  inset 1px 0 2px rgba(255,255,255,0.5),
+                  inset -1px 0 2px rgba(0,0,0,0.15),
+                  1px 0 3px rgba(0,0,0,0.2)
+                `,
+                borderRadius: '1px'
+              }
+            })
+          );
+        }
       }
       
       // Horizontal bars
-      const hBarSpacing = paneHeight / 4;
-      for (let i = 1; i < 4; i++) {
-        bars.push(
-          React.createElement('div', {
-            key: `h-${i}`,
-            className: 'glazing-bar horizontal',
-            style: {
-              position: 'absolute',
-              left: 0,
-              top: hBarSpacing * i - barWidth / 2,
-              width: paneWidth,
-              height: barWidth,
-              backgroundColor: sashColor,
-              boxShadow: '0 0 2px rgba(0,0,0,0.2)'
-            }
-          })
-        );
+      if (hBars > 0) {
+        const hBarSpacing = paneHeight / (hBars + 1);
+        for (let i = 1; i <= hBars; i++) {
+          bars.push(
+            React.createElement('div', {
+              key: `h-${i}`,
+              className: 'glazing-bar horizontal',
+              style: {
+                position: 'absolute',
+                left: 0,
+                top: hBarSpacing * i - barWidth / 2,
+                width: paneWidth,
+                height: barWidth,
+                backgroundColor: sashColor,
+                boxShadow: `
+                  inset 0 1px 2px rgba(255,255,255,0.5),
+                  inset 0 -1px 2px rgba(0,0,0,0.15),
+                  0 1px 3px rgba(0,0,0,0.2)
+                `,
+                borderRadius: '1px'
+              }
+            })
+          );
+        }
+      }
+    } else if (glazing.type === 'Leaded') {
+      // Leaded glass - thinner darker lines
+      const leadColor = glazing.leadColor?.includes('Silver') ? '#8a8a8a' : '#4a4a5a';
+      
+      // Vertical lines
+      if (vBars > 0) {
+        const vBarSpacing = paneWidth / (vBars + 1);
+        for (let i = 1; i <= vBars; i++) {
+          bars.push(
+            React.createElement('div', {
+              key: `v-${i}`,
+              className: 'glazing-bar vertical leaded',
+              style: {
+                position: 'absolute',
+                left: vBarSpacing * i - barWidth / 2,
+                top: 0,
+                width: barWidth,
+                height: paneHeight,
+                backgroundColor: leadColor,
+                boxShadow: '0 0 2px rgba(0,0,0,0.3)'
+              }
+            })
+          );
+        }
+      }
+      
+      // Horizontal lines
+      if (hBars > 0) {
+        const hBarSpacing = paneHeight / (hBars + 1);
+        for (let i = 1; i <= hBars; i++) {
+          bars.push(
+            React.createElement('div', {
+              key: `h-${i}`,
+              className: 'glazing-bar horizontal leaded',
+              style: {
+                position: 'absolute',
+                left: 0,
+                top: hBarSpacing * i - barWidth / 2,
+                width: paneWidth,
+                height: barWidth,
+                backgroundColor: leadColor,
+                boxShadow: '0 0 2px rgba(0,0,0,0.3)'
+              }
+            })
+          );
+        }
       }
     }
     

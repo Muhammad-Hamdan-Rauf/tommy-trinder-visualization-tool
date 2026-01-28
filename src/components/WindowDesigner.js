@@ -196,6 +196,7 @@ function WindowDesigner() {
         isOpen: true,
         onClose: handleCloseModal,
         currentGlazing: state.glazing,
+        initialType: modalData?.type || state.glazing?.type || 'Astragal',
         onApply: handleGlazingApply
       }),
       
