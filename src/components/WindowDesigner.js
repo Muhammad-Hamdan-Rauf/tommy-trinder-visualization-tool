@@ -217,11 +217,12 @@ function WindowDesigner() {
         onApply: handleHardwareApply
       }),
       
-      // Cill Modal
-      activeModal === 'cill' && React.createElement(CillModal, {
+      // Extras/Cill Modal
+      (activeModal === 'cill' || activeModal === 'extras') && React.createElement(CillModal, {
         isOpen: true,
         onClose: handleCloseModal,
         extras: state.extras,
+        initialTab: modalData || 'CILL',
         onApply: handleExtrasApply
       })
     );

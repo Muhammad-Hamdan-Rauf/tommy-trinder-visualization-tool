@@ -12,7 +12,7 @@ function VisualizationPreview({ onBack }) {
   const fileInputRef = useRef(null);
   const [windowState, setWindowState] = useState('closed');
   const [position, setPosition] = useState({ x: 50, y: 50 });
-  const [scale, setScale] = useState(0.4);
+  const [scale, setScale] = useState(0.85);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   

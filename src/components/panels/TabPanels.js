@@ -495,7 +495,7 @@ function ExtrasPanel({ onOpenModal }) {
       // Cill
       React.createElement('div', {
         className: `extra-item ${extras.cill.enabled ? 'enabled' : 'disabled'}`,
-        onClick: () => onOpenModal('cill')
+        onClick: () => onOpenModal('extras', 'CILL')
       },
         React.createElement('div', { className: 'extra-item-icon' },
           React.createElement('span', { className: 'icon' }, '▬')
@@ -519,7 +519,7 @@ function ExtrasPanel({ onOpenModal }) {
       // Head Drip
       React.createElement('div', {
         className: `extra-item ${extras.headDrip ? 'enabled' : 'disabled'}`,
-        onClick: () => onOpenModal('cill')
+        onClick: () => onOpenModal('extras', 'HEAD DRIP')
       },
         React.createElement('div', { className: 'extra-item-icon' },
           React.createElement('span', { className: 'icon' }, '⌃')
@@ -541,7 +541,7 @@ function ExtrasPanel({ onOpenModal }) {
       // Weather Bar
       React.createElement('div', {
         className: `extra-item ${extras.weatherBar ? 'enabled' : 'disabled'}`,
-        onClick: () => onOpenModal('cill')
+        onClick: () => onOpenModal('extras', 'WEATHER BAR')
       },
         React.createElement('div', { className: 'extra-item-icon' },
           React.createElement('span', { className: 'icon' }, '▭')
