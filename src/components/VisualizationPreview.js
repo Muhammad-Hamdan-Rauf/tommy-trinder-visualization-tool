@@ -245,7 +245,8 @@ function VisualizationPreview({ onBack }) {
             },
               React.createElement(WindowRenderer, {
                 scale: scale,
-                interactive: false
+                interactive: false,
+                showDimensions: true
               })
             )
           )
@@ -317,7 +318,8 @@ function VisualizationPreview({ onBack }) {
       },
         React.createElement(WindowRenderer, {
           scale: scale * 1.5,
-          interactive: false
+          interactive: false,
+          showDimensions: true
         })
       )
     ),

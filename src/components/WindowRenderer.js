@@ -20,7 +20,7 @@ const adjustBrightness = (hex, percent) => {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 };
 
-function WindowRenderer({ scale = 0.5, interactive = true }) {
+function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = false }) {
   const { state, actions } = useWindow();
   
   const { dimensions, panes, grid, openers, finish, glass, glazing, hardware, extras, preview } = state;
@@ -63,23 +63,29 @@ function WindowRenderer({ scale = 0.5, interactive = true }) {
   const renderOpenerIndicator = (pane, opener) => {
     if (!opener || opener.type === 'dummy' || opener.type === 'fixed') return null;
     
-    const paneWidth = (pane.width * scale) - sashWidth * 2;
-    const paneHeight = (pane.height * scale) - sashWidth * 2;
+    const paneWidth = pane.width * scale;
+    const paneHeight = pane.height * scale;
     
-    // Calculate handle position
-    let handleX, handleY;
+    // Calculate handle position and rotation based on opener type
+    let handleX, handleY, rotation;
     
     if (opener.type.includes('side-hung')) {
       if (opener.hinge === 'left') {
-        handleX = paneWidth - 15;
+        // Hinge on left, handle on right edge
+        handleX = paneWidth - sashWidth - 8;
         handleY = paneHeight / 2;
+        rotation = 0; // Handle points left
       } else {
-        handleX = 15;
+        // Hinge on right, handle on left edge
+        handleX = sashWidth + 8;
         handleY = paneHeight / 2;
+        rotation = 180; // Handle points right
       }
     } else if (opener.type === 'top-hung') {
+      // Hinge on top, handle on bottom edge
       handleX = paneWidth / 2;
-      handleY = paneHeight - 15;
+      handleY = paneHeight - sashWidth - 8;
+      rotation = 90; // Handle points up
     }
     
     return React.createElement('div', {
@@ -88,24 +94,45 @@ function WindowRenderer({ scale = 0.5, interactive = true }) {
         position: 'absolute',
         left: handleX,
         top: handleY,
-        transform: 'translate(-50%, -50%)'
+        transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+        zIndex: 10
       }
     },
+      // Window handle SVG - more realistic
       React.createElement('svg', {
-        width: '30',
-        height: '15',
-        viewBox: '0 0 30 15'
+        width: '24',
+        height: '8',
+        viewBox: '0 0 24 8',
+        style: { filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.3))' }
       },
-        React.createElement('ellipse', {
-          cx: '5',
-          cy: '7.5',
-          rx: '4',
-          ry: '4',
-          fill: '#333'
+        // Handle base (round part)
+        React.createElement('circle', {
+          cx: '4',
+          cy: '4',
+          r: '3.5',
+          fill: '#2c2c2c',
+          stroke: '#1a1a1a',
+          strokeWidth: '0.5'
         }),
-        React.createElement('path', {
-          d: 'M 8 6 Q 15 4, 25 7 Q 28 8, 25 9 Q 15 11, 8 9 Z',
-          fill: '#333'
+        // Handle lever
+        React.createElement('rect', {
+          x: '6',
+          y: '2',
+          width: '16',
+          height: '4',
+          rx: '1.5',
+          fill: '#2c2c2c',
+          stroke: '#1a1a1a',
+          strokeWidth: '0.5'
+        }),
+        // Highlight on lever
+        React.createElement('rect', {
+          x: '8',
+          y: '3',
+          width: '12',
+          height: '1',
+          fill: '#4a4a4a',
+          rx: '0.5'
         })
       )
     );
@@ -256,8 +283,8 @@ function WindowRenderer({ scale = 0.5, interactive = true }) {
   
   // Render dimension labels
   const renderDimensions = () => {
-    // Don't show dimensions in preview mode
-    if (!interactive || !preview.showDimensions) return null;
+    // Only show dimensions when showDimensions prop is true
+    if (!showDimensions) return null;
     
     const dimensions = [];
     
@@ -393,8 +420,8 @@ function WindowRenderer({ scale = 0.5, interactive = true }) {
       style: {
         position: 'absolute',
         bottom: -cillHeight,
-        left: -cillExtension,
-        width: scaledWidth + cillExtension * 2,
+        left: -(cillExtension + frameWidth),
+        width: scaledWidth + frameWidth * 2 + cillExtension * 2,
         height: cillHeight,
         background: `linear-gradient(180deg, ${cillColor} 0%, ${adjustBrightness(cillColor, -20)} 100%)`,
         boxShadow: `

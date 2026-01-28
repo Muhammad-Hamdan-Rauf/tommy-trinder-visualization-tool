@@ -887,11 +887,54 @@ html, body {
   margin: var(--spacing-sm) 0;
 }
 
-/* Canvas Area - Full size drawing canvas */
+/* Canvas Area - Split view with drawing and live preview */
 .canvas-area {
   flex: 1;
   display: flex;
   overflow: hidden;
+}
+
+.canvas-split-view {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  gap: 0;
+}
+
+.drawing-section,
+.preview-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.drawing-section {
+  border-right: 2px solid var(--border-light);
+}
+
+.section-label {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.live-window-preview {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9f9f9;
+  overflow: auto;
+  padding: 20px;
 }
 
 .canvas-container {

@@ -275,12 +275,29 @@ function WindowDesigner() {
         renderActivePanel()
       ),
       
-      // Main area - full canvas (fills entire space)
+      // Main area - split view with drawing canvas and live preview
       React.createElement('main', { className: 'canvas-area' },
-        React.createElement(DrawingCanvas, { 
-          onOpenDimensionsModal: () => handleOpenModal('dimensions'),
-          onToolsReady: (tools) => setCanvasTools(tools)
-        })
+        React.createElement('div', { className: 'canvas-split-view' },
+          // Drawing Canvas on the left
+          React.createElement('div', { className: 'drawing-section' },
+            React.createElement('div', { className: 'section-label' }, 'Design Canvas'),
+            React.createElement(DrawingCanvas, { 
+              onOpenDimensionsModal: () => handleOpenModal('dimensions'),
+              onToolsReady: (tools) => setCanvasTools(tools)
+            })
+          ),
+          // Live Window Rendering on the right
+          React.createElement('div', { className: 'preview-section' },
+            React.createElement('div', { className: 'section-label' }, 'Live Preview'),
+            React.createElement('div', { className: 'live-window-preview' },
+              React.createElement(WindowRenderer, {
+                scale: 0.6,
+                interactive: true,
+                showDimensions: false
+              })
+            )
+          )
+        )
       ),
       
       // Right side tools panel (separate from canvas)
