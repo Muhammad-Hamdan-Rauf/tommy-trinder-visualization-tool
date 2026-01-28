@@ -39,7 +39,7 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
   const defaultGlass = glass.default || {};
   const glassTexture = defaultGlass.texture || 'Clear';
   
-  // Get glass background based on texture and preview state
+  // Get glass background based on texture and preview state - realistic sky
   const getGlassBackground = (paneId) => {
     const paneGlass = glass[paneId] || defaultGlass;
     
@@ -47,9 +47,15 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
       return `url(${preview.backgroundImage})`;
     }
     
-    // Texture backgrounds
+    // Texture backgrounds - more realistic sky gradient
     const textureBackgrounds = {
-      'Clear': 'linear-gradient(180deg, #87CEEB 0%, #ADD8E6 50%, #87CEEB 100%)',
+      'Clear': `linear-gradient(180deg, 
+        #4A90D9 0%, 
+        #6BA3E0 15%, 
+        #87CEEB 35%, 
+        #B0E0F0 55%, 
+        #C5E8F5 75%, 
+        #E0F4FF 100%)`,
       'Arctic': 'linear-gradient(135deg, #d0d5d9 0%, #e8ebee 50%, #d0d5d9 100%)',
       'Contora': 'repeating-linear-gradient(90deg, #c5c8cb 0px, #d8dadc 2px, #c5c8cb 4px)',
       'Chantilly': 'radial-gradient(circle, #e0e0e0 1px, #dcdcdc 1px)',
@@ -59,7 +65,7 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
     return textureBackgrounds[paneGlass.texture] || textureBackgrounds['Clear'];
   };
   
-  // Draw opener indicator
+  // Draw opener indicator - Monkey tail / decorative handle style
   const renderOpenerIndicator = (pane, opener) => {
     if (!opener || opener.type === 'dummy' || opener.type === 'fixed') return null;
     
@@ -67,26 +73,33 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
     const paneHeight = pane.height * scale;
     
     // Calculate handle position and rotation based on opener type
-    let handleX, handleY, rotation;
+    let handleX, handleY, rotation, flipY;
     
     if (opener.type.includes('side-hung')) {
       if (opener.hinge === 'left') {
         // Hinge on left, handle on right edge
-        handleX = paneWidth - sashWidth - 8;
+        handleX = paneWidth - sashWidth - 12;
         handleY = paneHeight / 2;
-        rotation = 0; // Handle points left
+        rotation = -90;
+        flipY = false;
       } else {
         // Hinge on right, handle on left edge
-        handleX = sashWidth + 8;
+        handleX = sashWidth + 12;
         handleY = paneHeight / 2;
-        rotation = 180; // Handle points right
+        rotation = 90;
+        flipY = true;
       }
     } else if (opener.type === 'top-hung') {
       // Hinge on top, handle on bottom edge
       handleX = paneWidth / 2;
-      handleY = paneHeight - sashWidth - 8;
-      rotation = 90; // Handle points up
+      handleY = paneHeight - sashWidth - 12;
+      rotation = 0;
+      flipY = false;
     }
+    
+    // Scale handle size based on pane size
+    const handleScale = Math.min(1, Math.max(0.5, scale * 1.5));
+    const handleSize = 40 * handleScale;
     
     return React.createElement('div', {
       className: 'opener-handle',
@@ -94,45 +107,58 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
         position: 'absolute',
         left: handleX,
         top: handleY,
-        transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+        transform: `translate(-50%, -50%) rotate(${rotation}deg) ${flipY ? 'scaleX(-1)' : ''}`,
         zIndex: 10
       }
     },
-      // Window handle SVG - more realistic
+      // Monkey tail handle SVG - decorative traditional style
       React.createElement('svg', {
-        width: '24',
-        height: '8',
-        viewBox: '0 0 24 8',
-        style: { filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.3))' }
+        width: handleSize,
+        height: handleSize * 0.6,
+        viewBox: '0 0 50 30',
+        style: { filter: 'drop-shadow(2px 2px 2px rgba(0,0,0,0.4))' }
       },
-        // Handle base (round part)
+        // Handle mounting plate (escutcheon)
+        React.createElement('ellipse', {
+          cx: '10',
+          cy: '15',
+          rx: '8',
+          ry: '10',
+          fill: '#3a3a3a',
+          stroke: '#2a2a2a',
+          strokeWidth: '1'
+        }),
+        // Plate highlight
+        React.createElement('ellipse', {
+          cx: '8',
+          cy: '12',
+          rx: '4',
+          ry: '5',
+          fill: '#5a5a5a',
+          opacity: '0.5'
+        }),
+        // Handle stem
+        React.createElement('path', {
+          d: 'M 16 15 Q 25 15, 32 10 Q 38 6, 42 8 Q 48 12, 45 18 Q 42 24, 35 22 Q 30 20, 28 15',
+          fill: 'none',
+          stroke: '#2a2a2a',
+          strokeWidth: '4',
+          strokeLinecap: 'round'
+        }),
+        // Handle stem highlight
+        React.createElement('path', {
+          d: 'M 17 14 Q 24 14, 30 10 Q 35 7, 40 9',
+          fill: 'none',
+          stroke: '#5a5a5a',
+          strokeWidth: '1.5',
+          strokeLinecap: 'round'
+        }),
+        // Curl end
         React.createElement('circle', {
-          cx: '4',
-          cy: '4',
-          r: '3.5',
-          fill: '#2c2c2c',
-          stroke: '#1a1a1a',
-          strokeWidth: '0.5'
-        }),
-        // Handle lever
-        React.createElement('rect', {
-          x: '6',
-          y: '2',
-          width: '16',
-          height: '4',
-          rx: '1.5',
-          fill: '#2c2c2c',
-          stroke: '#1a1a1a',
-          strokeWidth: '0.5'
-        }),
-        // Highlight on lever
-        React.createElement('rect', {
-          x: '8',
-          y: '3',
-          width: '12',
-          height: '1',
-          fill: '#4a4a4a',
-          rx: '0.5'
+          cx: '35',
+          cy: '20',
+          r: '3',
+          fill: '#2a2a2a'
         })
       )
     );
@@ -270,11 +296,27 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
       },
       onClick: () => interactive && actions.selectPane(pane.id)
     },
-      // Sash frame
+      // Sash frame with inner rebate detail
       React.createElement('div', {
         className: 'sash-frame',
         style: getSashFrameStyle()
-      }),
+      },
+        // Inner rebate (step between sash and glass)
+        React.createElement('div', {
+          className: 'sash-rebate',
+          style: {
+            position: 'absolute',
+            left: sashWidth - 4,
+            top: sashWidth - 4,
+            right: sashWidth - 4,
+            bottom: sashWidth - 4,
+            border: `3px solid ${adjustBrightness(sashColor, -15)}`,
+            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)',
+            borderRadius: '2px',
+            pointerEvents: 'none'
+          }
+        })
+      ),
       
       // Glass
       React.createElement('div', {
@@ -288,16 +330,25 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
           background: getGlassBackground(pane.id),
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          boxShadow: 'inset 0 0 20px rgba(255,255,255,0.15)',
-          overflow: 'hidden'
+          boxShadow: 'inset 0 2px 15px rgba(255,255,255,0.3), inset 0 -2px 15px rgba(0,0,0,0.08)',
+          overflow: 'hidden',
+          borderRadius: '2px'
         }
       },
-        // Glass reflection overlay
+        // Glass reflection overlay - subtle diagonal shine
         React.createElement('div', {
           style: {
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.05) 100%)',
+            background: `linear-gradient(
+              135deg, 
+              rgba(255,255,255,0.25) 0%, 
+              rgba(255,255,255,0.08) 20%,
+              transparent 35%, 
+              transparent 65%, 
+              rgba(255,255,255,0.05) 80%,
+              rgba(255,255,255,0.15) 100%
+            )`,
             pointerEvents: 'none'
           }
         }),
@@ -330,125 +381,321 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
     // Only show dimensions when showDimensions prop is true
     if (!showDimensions) return null;
     
-    const dimensions = [];
+    const totalWidth = scaledWidth + frameWidth * 2;
+    const totalHeight = scaledHeight + frameWidth * 2;
+    const dimLabels = [];
     
-    // Overall width dimension (top, centered above window)
-    dimensions.push(
+    // Arrow end markers for dimension lines
+    const arrowSize = 6;
+    
+    // Spacing from window edge
+    const topOffset = -55;      // Overall width above window
+    const rightOffset = -70;    // Overall height right of window
+    const leftOffset = -70;     // Internal heights left of window
+    const bottomOffset = -55;   // Internal widths below window (accounting for cill)
+    
+    // === OVERALL WIDTH (top - red) ===
+    dimLabels.push(
       React.createElement('div', {
         key: 'width-top',
-        className: 'dimension-label horizontal-dim top-dim',
+        className: 'dimension-line horizontal',
         style: {
           position: 'absolute',
-          top: -45,
+          top: topOffset,
           left: 0,
-          width: scaledWidth,
+          width: totalWidth,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center'
         }
       },
-        React.createElement('div', { className: 'dim-line-horizontal', style: { width: '100%', height: '2px', background: '#e74c3c', marginBottom: '4px' } }),
-        React.createElement('span', { className: 'dim-value', style: { background: '#e74c3c', color: 'white', padding: '4px 12px', borderRadius: '4px', fontSize: '13px', fontWeight: '600' } }, state.dimensions.width)
+        // Line with arrows
+        React.createElement('svg', {
+          width: totalWidth,
+          height: 20,
+          style: { marginBottom: '4px' }
+        },
+          // Left vertical end line
+          React.createElement('line', {
+            x1: 0, y1: 0,
+            x2: 0, y2: 20,
+            stroke: '#c0392b', strokeWidth: 1.5
+          }),
+          // Horizontal line
+          React.createElement('line', {
+            x1: 0, y1: 10,
+            x2: totalWidth, y2: 10,
+            stroke: '#c0392b', strokeWidth: 1.5
+          }),
+          // Right vertical end line
+          React.createElement('line', {
+            x1: totalWidth, y1: 0,
+            x2: totalWidth, y2: 20,
+            stroke: '#c0392b', strokeWidth: 1.5
+          }),
+          // Left arrow
+          React.createElement('polygon', {
+            points: `0,10 ${arrowSize+2},${10-arrowSize/2} ${arrowSize+2},${10+arrowSize/2}`,
+            fill: '#c0392b'
+          }),
+          // Right arrow
+          React.createElement('polygon', {
+            points: `${totalWidth},10 ${totalWidth-arrowSize-2},${10-arrowSize/2} ${totalWidth-arrowSize-2},${10+arrowSize/2}`,
+            fill: '#c0392b'
+          })
+        ),
+        // Label
+        React.createElement('span', { 
+          style: { 
+            background: '#c0392b', 
+            color: 'white', 
+            padding: '4px 14px', 
+            borderRadius: '4px', 
+            fontSize: '13px', 
+            fontWeight: '600',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+          } 
+        }, Math.round(state.dimensions.width))
       )
     );
     
-    // Overall height dimension (right side, middle)
-    dimensions.push(
+    // === OVERALL HEIGHT (right - red) ===
+    dimLabels.push(
       React.createElement('div', {
         key: 'height-right',
-        className: 'dimension-label vertical-dim right-dim',
+        className: 'dimension-line vertical',
         style: {
           position: 'absolute',
-          right: -55,
+          right: rightOffset,
           top: 0,
-          height: scaledHeight,
+          height: totalHeight,
           display: 'flex',
           flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center'
+          alignItems: 'center'
         }
       },
-        React.createElement('div', { className: 'dim-line-vertical', style: { width: '2px', height: '100%', background: '#3498db', marginRight: '4px' } }),
-        React.createElement('span', { className: 'dim-value', style: { background: '#3498db', color: 'white', padding: '4px 12px', borderRadius: '4px', fontSize: '13px', fontWeight: '600', whiteSpace: 'nowrap' } }, state.dimensions.height)
+        // Line with arrows
+        React.createElement('svg', {
+          width: 20,
+          height: totalHeight,
+          style: { marginRight: '4px' }
+        },
+          // Top horizontal end line
+          React.createElement('line', {
+            x1: 0, y1: 0,
+            x2: 20, y2: 0,
+            stroke: '#c0392b', strokeWidth: 1.5
+          }),
+          // Vertical line
+          React.createElement('line', {
+            x1: 10, y1: 0,
+            x2: 10, y2: totalHeight,
+            stroke: '#c0392b', strokeWidth: 1.5
+          }),
+          // Bottom horizontal end line
+          React.createElement('line', {
+            x1: 0, y1: totalHeight,
+            x2: 20, y2: totalHeight,
+            stroke: '#c0392b', strokeWidth: 1.5
+          }),
+          // Top arrow
+          React.createElement('polygon', {
+            points: `10,0 ${10-arrowSize/2},${arrowSize+2} ${10+arrowSize/2},${arrowSize+2}`,
+            fill: '#c0392b'
+          }),
+          // Bottom arrow
+          React.createElement('polygon', {
+            points: `10,${totalHeight} ${10-arrowSize/2},${totalHeight-arrowSize-2} ${10+arrowSize/2},${totalHeight-arrowSize-2}`,
+            fill: '#c0392b'
+          })
+        ),
+        // Label
+        React.createElement('span', { 
+          style: { 
+            background: '#c0392b', 
+            color: 'white', 
+            padding: '4px 14px', 
+            borderRadius: '4px', 
+            fontSize: '13px', 
+            fontWeight: '600',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+          } 
+        }, Math.round(state.dimensions.height))
       )
     );
     
-    // If there are multiple rows, show row heights on left
-    if (grid.rows > 1 && state.dimensions.upperHeight) {
-      // Upper height
-      dimensions.push(
-        React.createElement('div', {
-          key: 'height-upper',
-          className: 'dimension-label vertical-dim left-dim',
-          style: {
-            position: 'absolute',
-            left: -55,
-            top: 0,
-            height: state.dimensions.upperHeight * scale,
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'flex-start'
-          }
-        },
-          React.createElement('span', { className: 'dim-value', style: { background: '#2ecc71', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '12px', fontWeight: '600', marginRight: '4px' } }, state.dimensions.upperHeight),
-          React.createElement('div', { className: 'dim-line-vertical', style: { width: '2px', height: '100%', background: '#2ecc71' } })
-        )
-      );
+    // === INTERNAL ROW HEIGHTS (left - green) ===
+    if (grid.rows > 1) {
+      const rowPanes = panes.filter(p => p.col === 0).sort((a, b) => a.row - b.row);
+      let currentY = frameWidth;
       
-      // Lower height
-      if (state.dimensions.lowerHeight) {
-        dimensions.push(
+      rowPanes.forEach((pane, index) => {
+        const rowHeight = pane.height * scale;
+        
+        dimLabels.push(
           React.createElement('div', {
-            key: 'height-lower',
-            className: 'dimension-label vertical-dim left-dim',
+            key: `row-height-${index}`,
+            className: 'dimension-line vertical internal',
             style: {
               position: 'absolute',
-              left: -55,
-              top: state.dimensions.upperHeight * scale,
-              height: state.dimensions.lowerHeight * scale,
+              left: leftOffset,
+              top: currentY,
+              height: rowHeight,
               display: 'flex',
               flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'flex-start'
+              alignItems: 'center'
             }
           },
-            React.createElement('span', { className: 'dim-value', style: { background: '#2ecc71', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '12px', fontWeight: '600', marginRight: '4px' } }, state.dimensions.lowerHeight),
-            React.createElement('div', { className: 'dim-line-vertical', style: { width: '2px', height: '100%', background: '#2ecc71' } })
+            // Line with arrows
+            React.createElement('svg', {
+              width: 20,
+              height: rowHeight,
+              style: { marginRight: '4px' }
+            },
+              // Top horizontal end line
+              React.createElement('line', {
+                x1: 0, y1: 0,
+                x2: 20, y2: 0,
+                stroke: '#27ae60', strokeWidth: 1.5
+              }),
+              // Vertical line
+              React.createElement('line', {
+                x1: 10, y1: 0,
+                x2: 10, y2: rowHeight,
+                stroke: '#27ae60', strokeWidth: 1.5
+              }),
+              // Bottom horizontal end line
+              React.createElement('line', {
+                x1: 0, y1: rowHeight,
+                x2: 20, y2: rowHeight,
+                stroke: '#27ae60', strokeWidth: 1.5
+              }),
+              // Top arrow
+              React.createElement('polygon', {
+                points: `10,0 ${10-arrowSize/2},${arrowSize+2} ${10+arrowSize/2},${arrowSize+2}`,
+                fill: '#27ae60'
+              }),
+              // Bottom arrow
+              React.createElement('polygon', {
+                points: `10,${rowHeight} ${10-arrowSize/2},${rowHeight-arrowSize-2} ${10+arrowSize/2},${rowHeight-arrowSize-2}`,
+                fill: '#27ae60'
+              })
+            ),
+            // Label
+            React.createElement('span', { 
+              style: { 
+                background: '#27ae60', 
+                color: 'white', 
+                padding: '3px 10px', 
+                borderRadius: '4px', 
+                fontSize: '12px', 
+                fontWeight: '600',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+              } 
+            }, Math.round(pane.height))
           )
         );
-      }
+        
+        currentY += rowHeight;
+      });
     }
     
-    // Column widths (bottom)
+    // === INTERNAL COLUMN WIDTHS (bottom - blue) ===
     if (grid.cols > 1) {
-      const firstRowPanes = panes.filter(p => p.row === 0).sort((a, b) => a.col - b.col);
-      firstRowPanes.forEach((pane, index) => {
-        const paneX = calculatePaneX(pane);
-        const paneWidth = pane.width * scale;
+      const colPanes = panes.filter(p => p.row === 0).sort((a, b) => a.col - b.col);
+      let currentX = frameWidth;
+      const cillOffset = extras.cill.enabled ? 30 : 0; // Extra space if cill is enabled
+      
+      colPanes.forEach((pane, index) => {
+        const colWidth = pane.width * scale;
+        // Column letters like TommyTrinder (A, B, C...)
+        const colLetter = String.fromCharCode(65 + (colPanes.length - 1 - index)); // Reverse: rightmost is A
         
-        dimensions.push(
+        dimLabels.push(
           React.createElement('div', {
-            key: `width-${pane.id}`,
-            className: 'dimension-label horizontal-dim bottom-dim',
+            key: `col-width-${index}`,
+            className: 'dimension-line horizontal internal',
             style: {
               position: 'absolute',
-              bottom: -45,
-              left: paneX - frameWidth,
-              width: paneWidth,
+              bottom: bottomOffset - cillOffset,
+              left: currentX,
+              width: colWidth,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center'
             }
           },
-            React.createElement('div', { className: 'dim-line-horizontal', style: { width: '100%', height: '2px', background: '#f39c12', marginTop: '4px' } }),
-            React.createElement('span', { className: 'dim-value', style: { background: '#f39c12', color: 'white', padding: '3px 10px', borderRadius: '4px', fontSize: '12px', fontWeight: '600', marginBottom: '4px' } }, pane.width)
+            // Line with arrows
+            React.createElement('svg', {
+              width: colWidth,
+              height: 20,
+              style: { marginBottom: '4px' }
+            },
+              // Left vertical end line
+              React.createElement('line', {
+                x1: 0, y1: 0,
+                x2: 0, y2: 20,
+                stroke: '#2980b9', strokeWidth: 1.5
+              }),
+              // Horizontal line
+              React.createElement('line', {
+                x1: 0, y1: 10,
+                x2: colWidth, y2: 10,
+                stroke: '#2980b9', strokeWidth: 1.5
+              }),
+              // Right vertical end line
+              React.createElement('line', {
+                x1: colWidth, y1: 0,
+                x2: colWidth, y2: 20,
+                stroke: '#2980b9', strokeWidth: 1.5
+              }),
+              // Left arrow
+              React.createElement('polygon', {
+                points: `0,10 ${arrowSize+2},${10-arrowSize/2} ${arrowSize+2},${10+arrowSize/2}`,
+                fill: '#2980b9'
+              }),
+              // Right arrow
+              React.createElement('polygon', {
+                points: `${colWidth},10 ${colWidth-arrowSize-2},${10-arrowSize/2} ${colWidth-arrowSize-2},${10+arrowSize/2}`,
+                fill: '#2980b9'
+              })
+            ),
+            // Label with dimension and column letter
+            React.createElement('div', {
+              style: {
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '2px'
+              }
+            },
+              React.createElement('span', { 
+                style: { 
+                  background: '#2980b9', 
+                  color: 'white', 
+                  padding: '3px 10px', 
+                  borderRadius: '4px', 
+                  fontSize: '12px', 
+                  fontWeight: '600',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                } 
+              }, Math.round(pane.width)),
+              React.createElement('span', { 
+                style: { 
+                  color: '#2980b9', 
+                  fontSize: '11px', 
+                  fontWeight: '600'
+                } 
+              }, colLetter)
+            )
           )
         );
+        
+        currentX += colWidth;
       });
     }
     
-    return React.createElement('div', { className: 'dimension-labels' }, ...dimensions);
+    return React.createElement('div', { className: 'dimension-labels' }, ...dimLabels);
   };
   
   // Render cill
@@ -472,17 +719,36 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
         left: -leftHorn,
         width: containerWidth + leftHorn + rightHorn,
         height: cillHeight,
-        background: `linear-gradient(180deg, ${cillColor} 0%, ${adjustBrightness(cillColor, -20)} 100%)`,
+        background: `linear-gradient(180deg, 
+          ${adjustBrightness(cillColor, 5)} 0%, 
+          ${cillColor} 30%, 
+          ${adjustBrightness(cillColor, -8)} 70%,
+          ${adjustBrightness(cillColor, -20)} 100%
+        )`,
         boxShadow: `
-          0 4px 12px rgba(0,0,0,0.3),
-          inset 0 2px 4px rgba(255,255,255,0.4),
-          inset 0 -1px 2px rgba(0,0,0,0.2)
+          0 6px 16px rgba(0,0,0,0.25),
+          0 3px 6px rgba(0,0,0,0.15),
+          inset 0 3px 6px rgba(255,255,255,0.5),
+          inset 0 -2px 4px rgba(0,0,0,0.15)
         `,
-        borderRadius: '0 0 6px 6px',
-        border: '1px solid rgba(0,0,0,0.1)',
+        borderRadius: '0 0 8px 8px',
+        border: '1px solid rgba(0,0,0,0.08)',
         borderTop: 'none'
       }
-    });
+    },
+      // Drip edge / nose detail
+      React.createElement('div', {
+        style: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '4px',
+          background: `linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.2) 100%)`,
+          borderRadius: '0 0 8px 8px'
+        }
+      })
+    );
   };
   
   // Show empty state if no panes designed
@@ -590,14 +856,29 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
       position: 'relative',
       width: scaledWidth + frameWidth * 2,
       height: scaledHeight + frameWidth * 2,
-      margin: '100px auto 120px'
+      margin: '120px auto 140px'
     }
   },
     // Main frame (outer border)
     React.createElement('div', {
       className: 'window-frame',
       style: getMainFrameStyle()
-    }),
+    },
+      // Frame inner edge highlight (bevel effect)
+      React.createElement('div', {
+        style: {
+          position: 'absolute',
+          left: frameWidth - 6,
+          top: frameWidth - 6,
+          right: frameWidth - 6,
+          bottom: frameWidth - 6,
+          border: `4px solid ${adjustBrightness(frameColor, -12)}`,
+          boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.2), 0 1px 2px rgba(255,255,255,0.3)',
+          borderRadius: '2px',
+          pointerEvents: 'none'
+        }
+      })
+    ),
     
     // Inner frame area (where panes sit)
     React.createElement('div', {
@@ -608,7 +889,8 @@ function WindowRenderer({ scale = 0.5, interactive = true, showDimensions = fals
         top: frameWidth,
         width: scaledWidth,
         height: scaledHeight,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        boxShadow: 'inset 0 3px 8px rgba(0,0,0,0.3), inset 0 -1px 4px rgba(0,0,0,0.15)'
       }
     },
       // Panes

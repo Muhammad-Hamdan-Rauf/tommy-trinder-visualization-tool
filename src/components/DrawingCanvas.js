@@ -286,8 +286,8 @@ function DrawingCanvas({ onOpenDimensionsModal, onToolsReady }) {
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
     
-    // Outer frame
-    ctx.fillStyle = state.finish.frame.colorHex || '#f8f6f0';
+    // Outer frame - use fixed neutral color for design canvas
+    ctx.fillStyle = '#f8f6f0'; // Fixed white/cream color
     ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
     
     // Reset shadow
@@ -325,7 +325,8 @@ function DrawingCanvas({ onOpenDimensionsModal, onToolsReady }) {
   const drawDividerLine = (ctx, line) => {
     const barWidth = 12;
     
-    ctx.fillStyle = state.finish.frame.colorHex || '#f8f6f0';
+    // Use fixed neutral color for design canvas
+    ctx.fillStyle = '#f8f6f0'; // Fixed white/cream color
     ctx.strokeStyle = '#ccc';
     ctx.lineWidth = 1;
     

@@ -293,7 +293,7 @@ function WindowDesigner() {
               React.createElement(WindowRenderer, {
                 scale: 0.6,
                 interactive: true,
-                showDimensions: false
+                showDimensions: true
               })
             )
           )

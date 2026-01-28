@@ -1,121 +1,213 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Button, Card, Tabs, Toggle } from '../common/UIComponents.js';
 
 /**
  * FinishModal Component
- * Modal for selecting frame/sash finishes
+ * Modal for selecting frame/sash/cill finishes
  */
 function FinishModal({ isOpen, onClose, currentFinish, part = 'frame', onApply }) {
-  const [activeTab, setActiveTab] = useState('FRAME');
-  const [finishType, setFinishType] = useState('Foils');
+  const [finishType, setFinishType] = useState(currentFinish?.type || 'Foils');
   const [selectedColor, setSelectedColor] = useState(currentFinish?.color || 'White Grain');
   
-  const tabs = [
-    { id: 'FRAME', label: 'FRAME' },
-    { id: 'SASH', label: 'SASH' },
-  ];
+  // Reset when modal opens with different part
+  useEffect(() => {
+    if (isOpen && currentFinish) {
+      setFinishType(currentFinish.type || 'Foils');
+      setSelectedColor(currentFinish.color || 'White Grain');
+    }
+  }, [isOpen, currentFinish]);
   
   const finishTypes = [
-    { value: 'Foils', label: 'Foils' },
-    { value: 'Spray', label: 'Spray' },
-    { value: 'Standard', label: 'Standard' },
+    { value: 'Foils', label: 'Foils', description: 'Wood-effect laminated films' },
+    { value: 'Spray', label: 'Spray', description: 'Custom spray painted finish' },
+    { value: 'Standard', label: 'Standard', description: 'Standard solid colours' },
   ];
   
-  const colors = [
-    { id: 'smooth-white', name: 'Smooth White', color: '#ffffff', texture: null },
-    { id: 'white-grain', name: 'White Grain', color: '#f8f6f0', texture: 'wood-grain' },
-    { id: 'winchester-xc', name: 'Winchester XC', color: '#5D3A1A', texture: 'wood' },
-    { id: 'winchester-xc-white', name: 'Winchester XC & Smooth White', color: '#5D3A1A', secondColor: '#ffffff', dual: true },
-    { id: 'winchester-xc-grain', name: 'Winchester XC & White Grain', color: '#5D3A1A', secondColor: '#f8f6f0', dual: true },
-    { id: 'windsor', name: 'Windsor', color: '#8B7355', texture: 'wood' },
-    { id: 'windsor-white', name: 'Windsor & Smooth White', color: '#8B7355', secondColor: '#ffffff', dual: true },
-    { id: 'windsor-grain', name: 'Windsor & White Grain', color: '#8B7355', secondColor: '#f8f6f0', dual: true },
-    { id: 'wine-red', name: 'Wine Red', color: '#722F37', texture: null },
-    { id: 'wine-red-white', name: 'Wine Red & Smooth White', color: '#722F37', secondColor: '#ffffff', dual: true },
-    { id: 'wine-red-grain', name: 'Wine Red & White Grain', color: '#722F37', secondColor: '#f8f6f0', dual: true },
-    { id: 'anthracite-grey', name: 'Anthracite Grey', color: '#383E42', texture: null },
-    { id: 'chartwell-green', name: 'Chartwell Green', color: '#4A6741', texture: null },
-    { id: 'cream', name: 'Cream', color: '#FFFDD0', texture: null },
-    { id: 'irish-oak', name: 'Irish Oak', color: '#6B4423', texture: 'wood' },
-    { id: 'golden-oak', name: 'Golden Oak', color: '#B8860B', texture: 'wood' },
-    { id: 'rosewood', name: 'Rosewood', color: '#65000B', texture: 'wood' },
-    { id: 'black', name: 'Black', color: '#1C1C1C', texture: null },
-  ];
+  // Colors organized by finish type
+  const colorsByType = {
+    'Foils': [
+      { id: 'white-grain', name: 'White Grain', color: '#f8f6f0', texture: 'wood-grain' },
+      { id: 'cream-grain', name: 'Cream Grain', color: '#F5F5DC', texture: 'wood-grain' },
+      { id: 'winchester-xc', name: 'Winchester XC', color: '#5D3A1A', texture: 'wood' },
+      { id: 'irish-oak', name: 'Irish Oak', color: '#6B4423', texture: 'wood' },
+      { id: 'golden-oak', name: 'Golden Oak', color: '#B8860B', texture: 'wood' },
+      { id: 'rosewood', name: 'Rosewood', color: '#65000B', texture: 'wood' },
+      { id: 'mahogany', name: 'Mahogany', color: '#C04000', texture: 'wood' },
+      { id: 'walnut', name: 'Walnut', color: '#5D432C', texture: 'wood' },
+      { id: 'cherrywood', name: 'Cherrywood', color: '#DE3163', texture: 'wood' },
+      { id: 'anthracite-grey-foil', name: 'Anthracite Grey', color: '#383E42', texture: 'wood-grain' },
+      { id: 'black-ash', name: 'Black Ash', color: '#1C1C1C', texture: 'wood' },
+      { id: 'chartwell-green-foil', name: 'Chartwell Green', color: '#4A6741', texture: 'wood-grain' },
+    ],
+    'Spray': [
+      { id: 'ral-9010', name: 'RAL 9010 Pure White', color: '#FFFFFF', texture: null },
+      { id: 'ral-9001', name: 'RAL 9001 Cream', color: '#FFFDE6', texture: null },
+      { id: 'ral-7016', name: 'RAL 7016 Anthracite', color: '#383E42', texture: null },
+      { id: 'ral-7012', name: 'RAL 7012 Basalt Grey', color: '#4E5754', texture: null },
+      { id: 'ral-7035', name: 'RAL 7035 Light Grey', color: '#D7D7D7', texture: null },
+      { id: 'ral-6005', name: 'RAL 6005 Moss Green', color: '#114232', texture: null },
+      { id: 'ral-6021', name: 'RAL 6021 Pale Green', color: '#89AC76', texture: null },
+      { id: 'ral-5011', name: 'RAL 5011 Steel Blue', color: '#1A2B3C', texture: null },
+      { id: 'ral-3005', name: 'RAL 3005 Wine Red', color: '#5E2028', texture: null },
+      { id: 'ral-8014', name: 'RAL 8014 Sepia Brown', color: '#49392D', texture: null },
+      { id: 'ral-9005', name: 'RAL 9005 Jet Black', color: '#0A0A0A', texture: null },
+      { id: 'ral-1015', name: 'RAL 1015 Light Ivory', color: '#E6D2B5', texture: null },
+    ],
+    'Standard': [
+      { id: 'smooth-white', name: 'Smooth White', color: '#ffffff', texture: null },
+      { id: 'cream', name: 'Cream', color: '#FFFDD0', texture: null },
+      { id: 'white-grain-std', name: 'White Grain', color: '#f8f6f0', texture: 'wood-grain' },
+      { id: 'light-grey', name: 'Light Grey', color: '#D3D3D3', texture: null },
+      { id: 'anthracite-grey', name: 'Anthracite Grey', color: '#383E42', texture: null },
+      { id: 'black', name: 'Black', color: '#1C1C1C', texture: null },
+    ],
+  };
+  
+  const currentColors = colorsByType[finishType] || colorsByType['Foils'];
   
   const handleApply = () => {
-    const selected = colors.find(c => c.name === selectedColor);
-    onApply(activeTab.toLowerCase(), {
+    const selected = currentColors.find(c => c.name === selectedColor);
+    onApply(part, {
       type: finishType,
       color: selectedColor,
-      colorHex: selected?.color,
+      colorHex: selected?.color || '#f8f6f0',
       texture: selected?.texture,
     });
+    onClose();
+  };
+  
+  const partNames = {
+    frame: 'Frame',
+    sash: 'Sash',
+    cill: 'Cill'
   };
   
   return React.createElement(Modal, {
-    title: 'Manage Sash Finish',
+    title: `${partNames[part]} Finish`,
     isOpen,
     onClose,
-    width: '650px'
+    width: '700px'
   },
     React.createElement('div', { className: 'finish-modal' },
-      React.createElement(Tabs, {
-        tabs,
-        activeTab,
-        onTabChange: setActiveTab
-      }),
+      // Finish Type Selection
+      React.createElement('div', { className: 'finish-type-section' },
+        React.createElement('h4', { style: { marginBottom: '12px', color: '#333' } }, 'Finish Type'),
+        React.createElement('div', { className: 'finish-type-grid', style: { display: 'flex', gap: '12px', marginBottom: '20px' } },
+          finishTypes.map((type) =>
+            React.createElement('div', {
+              key: type.value,
+              className: `finish-type-card ${finishType === type.value ? 'selected' : ''}`,
+              onClick: () => {
+                setFinishType(type.value);
+                // Reset to first color of new type
+                const firstColor = colorsByType[type.value][0];
+                setSelectedColor(firstColor.name);
+              },
+              style: {
+                flex: 1,
+                padding: '16px',
+                border: finishType === type.value ? '2px solid #10b981' : '2px solid #e5e7eb',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                background: finishType === type.value ? '#ecfdf5' : '#fff',
+                textAlign: 'center',
+                transition: 'all 0.2s'
+              }
+            },
+              React.createElement('div', { style: { fontWeight: '600', marginBottom: '4px' } }, type.label),
+              React.createElement('div', { style: { fontSize: '12px', color: '#666' } }, type.description)
+            )
+          )
+        )
+      ),
       
-      React.createElement('div', { className: 'finish-type-select' },
-        React.createElement('label', null, 'Type:'),
-        React.createElement('select', {
-          className: 'select-field',
-          value: finishType,
-          onChange: (e) => setFinishType(e.target.value)
+      // Color Selection Grid
+      React.createElement('div', { className: 'color-section' },
+        React.createElement('h4', { style: { marginBottom: '12px', color: '#333' } }, 'Select Colour'),
+        React.createElement('div', { 
+          className: 'color-grid',
+          style: {
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '12px',
+            maxHeight: '300px',
+            overflowY: 'auto',
+            padding: '4px'
+          }
         },
-          finishTypes.map((t) =>
-            React.createElement('option', { key: t.value, value: t.value }, t.label)
+          currentColors.map((color) =>
+            React.createElement('div', {
+              key: color.id,
+              className: `color-swatch-card ${selectedColor === color.name ? 'selected' : ''}`,
+              onClick: () => setSelectedColor(color.name),
+              style: {
+                border: selectedColor === color.name ? '3px solid #10b981' : '2px solid #e5e7eb',
+                borderRadius: '8px',
+                padding: '8px',
+                cursor: 'pointer',
+                background: selectedColor === color.name ? '#ecfdf5' : '#fff',
+                transition: 'all 0.2s'
+              }
+            },
+              React.createElement('div', {
+                className: 'swatch-preview',
+                style: {
+                  width: '100%',
+                  height: '50px',
+                  backgroundColor: color.color,
+                  borderRadius: '4px',
+                  marginBottom: '8px',
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+                }
+              }),
+              React.createElement('span', { 
+                className: 'swatch-label',
+                style: { fontSize: '11px', fontWeight: '500', color: '#333', textAlign: 'center', display: 'block' }
+              }, color.name)
+            )
           )
         )
       ),
       
-      React.createElement('div', { className: 'color-grid' },
-        colors.map((color) =>
-          React.createElement('div', {
-            key: color.id,
-            className: `color-swatch-card ${selectedColor === color.name ? 'selected' : ''}`,
-            onClick: () => setSelectedColor(color.name)
-          },
-            React.createElement('div', { className: 'swatch-preview-box' },
-              color.dual
-                ? React.createElement('div', { className: 'swatch-dual-preview' },
-                    React.createElement('div', {
-                      className: 'swatch-half-top',
-                      style: { backgroundColor: color.color }
-                    }),
-                    React.createElement('div', {
-                      className: 'swatch-half-bottom',
-                      style: { backgroundColor: color.secondColor }
-                    })
-                  )
-                : React.createElement('div', {
-                    className: 'swatch-full',
-                    style: { backgroundColor: color.color }
-                  })
-            ),
-            React.createElement('span', { className: 'swatch-label' }, color.name)
-          )
+      // Current Selection Preview
+      React.createElement('div', { 
+        className: 'selection-preview',
+        style: {
+          marginTop: '20px',
+          padding: '16px',
+          background: '#f9fafb',
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px'
+        }
+      },
+        React.createElement('div', {
+          style: {
+            width: '60px',
+            height: '60px',
+            backgroundColor: currentColors.find(c => c.name === selectedColor)?.color || '#f8f6f0',
+            borderRadius: '8px',
+            border: '2px solid #ddd',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }
+        }),
+        React.createElement('div', null,
+          React.createElement('div', { style: { fontWeight: '600', fontSize: '16px' } }, selectedColor),
+          React.createElement('div', { style: { color: '#666', fontSize: '14px' } }, `${finishType} finish for ${partNames[part]}`)
         )
       ),
       
-      React.createElement('div', { className: 'modal-actions' },
+      React.createElement('div', { className: 'modal-actions', style: { marginTop: '20px', display: 'flex', gap: '12px', justifyContent: 'flex-end' } },
         React.createElement(Button, {
           variant: 'secondary',
           onClick: onClose
-        }, 'Close'),
+        }, 'Cancel'),
         React.createElement(Button, {
           variant: 'success',
           onClick: handleApply
-        }, `Apply to ${activeTab === 'FRAME' ? 'Frame' : 'Sash'}`)
+        }, `Apply to ${partNames[part]}`)
       )
     )
   );
