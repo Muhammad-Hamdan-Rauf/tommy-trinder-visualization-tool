@@ -31,6 +31,62 @@ function DrawingCanvas({ onOpenDimensionsModal, onToolsReady }) {
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   
+  // Restore canvas state from context when component mounts
+  useEffect(() => {
+    // If we have panes in context but no canvas frame, restore the canvas state
+    if (state.panes && state.panes.length > 0 && !frameRect) {
+      // Reconstruct frame from dimensions
+      const centerX = canvasSize.width / 2;
+      const centerY = canvasSize.height / 2;
+      const reconstructedFrame = {
+        x: centerX - state.dimensions.width / 2,
+        y: centerY - state.dimensions.height / 2,
+        width: state.dimensions.width,
+        height: state.dimensions.height
+      };
+      
+      setFrameRect(reconstructedFrame);
+      setFrameDrawn(true);
+      
+      // Reconstruct divider lines from grid
+      const frameWidth = 15;
+      const reconstructedDividers = [];
+      
+      // Add vertical dividers
+      state.grid.verticalDividers.forEach(pos => {
+        reconstructedDividers.push({
+          orientation: 'vertical',
+          x: reconstructedFrame.x + pos,
+          y1: reconstructedFrame.y + frameWidth,
+          y2: reconstructedFrame.y + reconstructedFrame.height - frameWidth
+        });
+      });
+      
+      // Add horizontal dividers
+      state.grid.horizontalDividers.forEach(pos => {
+        reconstructedDividers.push({
+          orientation: 'horizontal',
+          x1: reconstructedFrame.x + frameWidth,
+          x2: reconstructedFrame.x + reconstructedFrame.width - frameWidth,
+          y: reconstructedFrame.y + pos
+        });
+      });
+      
+      setDividerLines(reconstructedDividers);
+      
+      // Save initial state to history
+      setTimeout(() => {
+        saveToHistory({
+          frameRect: reconstructedFrame,
+          frameDrawn: true,
+          dividerLines: reconstructedDividers,
+          paths: [],
+          drawingSegments: []
+        });
+      }, 100);
+    }
+  }, [state.panes, state.dimensions, state.grid, canvasSize]);
+  
   // Expose tool functions to parent via callback
   useEffect(() => {
     if (onToolsReady) {

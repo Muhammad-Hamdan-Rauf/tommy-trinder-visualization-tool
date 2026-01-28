@@ -11,8 +11,10 @@ function OpenersPanel({ onOpenModal }) {
   const { panes, openers } = state;
   
   const openerIcons = {
-    'side-hung': '◧',
+    'side-hung-left': '◧',
+    'side-hung-right': '◨',
     'top-hung': '⬒',
+    'dummy': '▢',
     'fixed': '▢',
   };
   

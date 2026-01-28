@@ -83,7 +83,7 @@ const initialWindowState = {
   preview: {
     backgroundImage: null,
     windowState: 'closed', // 'closed', 'half-open', 'open'
-    showDimensions: true,
+    showDimensions: false,
   },
   
   // Drawing state

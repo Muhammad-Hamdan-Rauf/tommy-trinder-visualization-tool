@@ -56,13 +56,41 @@ function VisualizationPreview({ onBack }) {
   
   return React.createElement('div', { className: 'visualization-preview' },
     // Controls bar
-    React.createElement('div', { className: 'preview-controls' },
+    React.createElement('div', { 
+      className: 'preview-controls',
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px 24px',
+        background: 'white',
+        borderBottom: '1px solid #e5e7eb',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+      }
+    },
       React.createElement(Button, {
         variant: 'secondary',
-        onClick: onBack
+        onClick: onBack,
+        style: {
+          padding: '10px 20px',
+          fontSize: '15px',
+          fontWeight: '500',
+          border: '1px solid #d1d5db',
+          borderRadius: '8px',
+          background: 'white',
+          cursor: 'pointer',
+          transition: 'all 0.2s'
+        }
       }, '← Back to Editor'),
       
-      React.createElement('div', { className: 'preview-actions' },
+      React.createElement('div', { 
+        className: 'preview-actions',
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          gap: '20px'
+        }
+      },
         React.createElement('input', {
           ref: fileInputRef,
           type: 'file',
@@ -72,39 +100,116 @@ function VisualizationPreview({ onBack }) {
         }),
         React.createElement(Button, {
           variant: 'primary',
-          onClick: () => fileInputRef.current.click()
+          onClick: () => fileInputRef.current.click(),
+          style: {
+            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+            color: 'white',
+            padding: '10px 24px',
+            fontSize: '15px',
+            fontWeight: '600',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
+            transition: 'all 0.2s'
+          }
         }, '📷 Upload Background Photo'),
         
-        React.createElement('div', { className: 'scale-control' },
-          React.createElement('label', null, 'Scale:'),
+        React.createElement('div', { 
+          className: 'scale-control',
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '8px 16px',
+            background: '#f9fafb',
+            borderRadius: '8px',
+            border: '1px solid #e5e7eb'
+          }
+        },
+          React.createElement('label', { 
+            style: {
+              fontSize: '14px',
+              fontWeight: '500',
+              color: '#6b7280'
+            }
+          }, 'Scale:'),
           React.createElement('input', {
             type: 'range',
             min: '0.2',
             max: '1',
             step: '0.05',
             value: scale,
-            onChange: (e) => setScale(parseFloat(e.target.value))
+            onChange: (e) => setScale(parseFloat(e.target.value)),
+            style: {
+              width: '120px',
+              cursor: 'pointer'
+            }
           }),
-          React.createElement('span', null, `${Math.round(scale * 100)}%`)
+          React.createElement('span', { 
+            style: {
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#3b82f6',
+              minWidth: '45px',
+              textAlign: 'right'
+            }
+          }, `${Math.round(scale * 100)}%`)
         )
       )
     ),
     
     // Window state selector
-    React.createElement('div', { className: 'window-state-selector' },
-      React.createElement('span', null, 'Window State:'),
+    React.createElement('div', { 
+      className: 'window-state-selector',
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '16px',
+        padding: '16px',
+        background: 'linear-gradient(to bottom, #f9fafb, #f3f4f6)',
+        borderBottom: '1px solid #e5e7eb'
+      }
+    },
+      React.createElement('span', { 
+        style: {
+          fontSize: '15px',
+          fontWeight: '600',
+          color: '#374151',
+          marginRight: '8px'
+        }
+      }, 'Window State:'),
       windowStates.map((ws) =>
-        React.createElement(Card, {
+        React.createElement('button', {
           key: ws.id,
-          selected: windowState === ws.id,
           onClick: () => {
             setWindowState(ws.id);
             actions.setPreview({ windowState: ws.id });
           },
-          className: 'state-card'
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 20px',
+            minWidth: '120px',
+            fontSize: '14px',
+            fontWeight: '500',
+            border: windowState === ws.id ? '2px solid #3b82f6' : '2px solid #e5e7eb',
+            borderRadius: '8px',
+            background: windowState === ws.id ? '#eff6ff' : 'white',
+            color: windowState === ws.id ? '#3b82f6' : '#6b7280',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            boxShadow: windowState === ws.id ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none'
+          }
         },
-          React.createElement('span', { className: 'state-icon' }, ws.icon),
-          React.createElement('span', { className: 'state-label' }, ws.label)
+          React.createElement('span', { 
+            style: { 
+              fontSize: '18px'
+            }
+          }, ws.icon),
+          React.createElement('span', null, ws.label)
         )
       )
     ),
@@ -218,9 +323,42 @@ function VisualizationPreview({ onBack }) {
     ),
     
     // Tips
-    React.createElement('div', { className: 'preview-tips' },
-      React.createElement('p', null, '💡 Tip: Drag the window to position it on your photo'),
-      React.createElement('p', null, '🔍 Use the scale slider to resize the window')
+    React.createElement('div', { 
+      className: 'preview-tips',
+      style: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '32px',
+        padding: '12px 24px',
+        background: 'linear-gradient(to right, #f9fafb, white, #f9fafb)',
+        borderTop: '1px solid #e5e7eb',
+        fontSize: '14px',
+        color: '#6b7280'
+      }
+    },
+      React.createElement('p', { 
+        style: { 
+          margin: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        } 
+      }, 
+        React.createElement('span', { style: { fontSize: '16px' } }, '💡'),
+        'Drag the window to position it on your photo'
+      ),
+      React.createElement('p', { 
+        style: { 
+          margin: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        } 
+      }, 
+        React.createElement('span', { style: { fontSize: '16px' } }, '🔍'),
+        'Use the scale slider to resize the window'
+      )
     )
   );
 }

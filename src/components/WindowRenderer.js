@@ -5,6 +5,21 @@ import { useWindow } from '../context/WindowContext.js';
  * WindowRenderer Component
  * Renders the window visualization based on current configuration
  */
+
+// Helper function to adjust color brightness
+const adjustBrightness = (hex, percent) => {
+  // Remove # if present
+  hex = hex.replace('#', '');
+  
+  // Parse RGB
+  const num = parseInt(hex, 16);
+  const r = Math.min(255, Math.max(0, (num >> 16) + percent));
+  const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + percent));
+  const b = Math.min(255, Math.max(0, (num & 0x0000FF) + percent));
+  
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+};
+
 function WindowRenderer({ scale = 0.5, interactive = true }) {
   const { state, actions } = useWindow();
   
@@ -46,7 +61,7 @@ function WindowRenderer({ scale = 0.5, interactive = true }) {
   
   // Draw opener indicator
   const renderOpenerIndicator = (pane, opener) => {
-    if (!opener || opener.type === 'dummy') return null;
+    if (!opener || opener.type === 'dummy' || opener.type === 'fixed') return null;
     
     const paneWidth = (pane.width * scale) - sashWidth * 2;
     const paneHeight = (pane.height * scale) - sashWidth * 2;
@@ -54,7 +69,7 @@ function WindowRenderer({ scale = 0.5, interactive = true }) {
     // Calculate handle position
     let handleX, handleY;
     
-    if (opener.type === 'side-hung') {
+    if (opener.type.includes('side-hung')) {
       if (opener.hinge === 'left') {
         handleX = paneWidth - 15;
         handleY = paneHeight / 2;
@@ -177,9 +192,16 @@ function WindowRenderer({ scale = 0.5, interactive = true }) {
           position: 'absolute',
           inset: 0,
           border: `${sashWidth}px solid ${sashColor}`,
-          boxShadow: 'inset 0 0 5px rgba(0,0,0,0.1), 0 0 3px rgba(0,0,0,0.1)',
-          borderRadius: '2px',
-          boxSizing: 'border-box'
+          boxShadow: `
+            inset 0 2px 4px rgba(255,255,255,0.6),
+            inset 0 -2px 4px rgba(0,0,0,0.15),
+            inset 2px 0 4px rgba(255,255,255,0.4),
+            inset -2px 0 4px rgba(0,0,0,0.1),
+            0 2px 8px rgba(0,0,0,0.2)
+          `,
+          borderRadius: '3px',
+          boxSizing: 'border-box',
+          background: `linear-gradient(135deg, ${sashColor} 0%, ${adjustBrightness(sashColor, -10)} 100%)`
         }
       }),
       
@@ -194,9 +216,20 @@ function WindowRenderer({ scale = 0.5, interactive = true }) {
           bottom: sashWidth,
           background: getGlassBackground(pane.id),
           backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          backgroundPosition: 'center',
+          boxShadow: 'inset 0 0 20px rgba(255,255,255,0.15)',
+          overflow: 'hidden'
         }
       },
+        // Glass reflection overlay
+        React.createElement('div', {
+          style: {
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.05) 100%)',
+            pointerEvents: 'none'
+          }
+        }),
         renderGlazingBars(pane)
       ),
       
@@ -205,33 +238,26 @@ function WindowRenderer({ scale = 0.5, interactive = true }) {
     );
   };
   
-  // Calculate pane X position
+  // Calculate pane X position (relative to inner container, no frameWidth offset needed)
   const calculatePaneX = (pane) => {
-    let x = frameWidth;
-    for (let i = 0; i < pane.col; i++) {
-      const prevPane = panes.find(p => p.row === pane.row && p.col === i);
-      if (prevPane) {
-        x += prevPane.width * scale;
-      }
-    }
-    return x;
+    // Get all panes in the same row before this column
+    const panesBeforeInRow = panes.filter(p => p.row === pane.row && p.col < pane.col);
+    const totalWidthBefore = panesBeforeInRow.reduce((sum, p) => sum + (p.width * scale), 0);
+    return totalWidthBefore;
   };
   
-  // Calculate pane Y position
+  // Calculate pane Y position (relative to inner container, no frameWidth offset needed)
   const calculatePaneY = (pane) => {
-    let y = frameWidth;
-    for (let i = 0; i < pane.row; i++) {
-      const prevPane = panes.find(p => p.row === i && p.col === pane.col);
-      if (prevPane) {
-        y += prevPane.height * scale;
-      }
-    }
-    return y;
+    // Get all panes in the same column before this row
+    const panesBeforeInCol = panes.filter(p => p.col === pane.col && p.row < pane.row);
+    const totalHeightBefore = panesBeforeInCol.reduce((sum, p) => sum + (p.height * scale), 0);
+    return totalHeightBefore;
   };
   
   // Render dimension labels
   const renderDimensions = () => {
-    if (!preview.showDimensions) return null;
+    // Don't show dimensions in preview mode
+    if (!interactive || !preview.showDimensions) return null;
     
     const dimensions = [];
     
@@ -358,8 +384,9 @@ function WindowRenderer({ scale = 0.5, interactive = true }) {
   const renderCill = () => {
     if (!extras.cill.enabled) return null;
     
-    const cillHeight = 15 * scale;
-    const cillExtension = extras.cill.leftHorn * scale;
+    const cillHeight = 20 * scale;
+    const cillExtension = (extras.cill.leftHorn || 50) * scale;
+    const cillColor = finish.cill?.colorHex || finish.frame.colorHex || '#f8f6f0';
     
     return React.createElement('div', {
       className: 'window-cill',
@@ -369,9 +396,15 @@ function WindowRenderer({ scale = 0.5, interactive = true }) {
         left: -cillExtension,
         width: scaledWidth + cillExtension * 2,
         height: cillHeight,
-        backgroundColor: finish.cill?.colorHex || '#f8f6f0',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-        borderRadius: '0 0 3px 3px'
+        background: `linear-gradient(180deg, ${cillColor} 0%, ${adjustBrightness(cillColor, -20)} 100%)`,
+        boxShadow: `
+          0 4px 12px rgba(0,0,0,0.3),
+          inset 0 2px 4px rgba(255,255,255,0.4),
+          inset 0 -1px 2px rgba(0,0,0,0.2)
+        `,
+        borderRadius: '0 0 6px 6px',
+        border: '1px solid rgba(0,0,0,0.1)',
+        borderTop: 'none'
       }
     });
   };
@@ -425,25 +458,44 @@ function WindowRenderer({ scale = 0.5, interactive = true }) {
     className: 'window-renderer',
     style: {
       position: 'relative',
-      width: scaledWidth,
-      height: scaledHeight,
-      margin: '80px auto'
+      width: scaledWidth + frameWidth * 2,
+      height: scaledHeight + frameWidth * 2,
+      margin: '100px auto 120px'
     }
   },
-    // Main frame
+    // Main frame (outer border)
     React.createElement('div', {
       className: 'window-frame',
       style: {
         position: 'absolute',
         inset: 0,
-        backgroundColor: frameColor,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-        borderRadius: '3px'
+        background: `linear-gradient(145deg, ${frameColor} 0%, ${adjustBrightness(frameColor, -8)} 100%)`,
+        boxShadow: `
+          0 8px 32px rgba(0,0,0,0.25),
+          0 4px 12px rgba(0,0,0,0.15),
+          inset 0 2px 4px rgba(255,255,255,0.3),
+          inset 0 -2px 4px rgba(0,0,0,0.2)
+        `,
+        borderRadius: '4px',
+        border: '2px solid rgba(0,0,0,0.1)'
       }
     }),
     
-    // Panes
-    panes.map((pane, index) => renderPane(pane, index)),
+    // Inner frame area (where panes sit)
+    React.createElement('div', {
+      className: 'window-inner',
+      style: {
+        position: 'absolute',
+        left: frameWidth,
+        top: frameWidth,
+        width: scaledWidth,
+        height: scaledHeight,
+        overflow: 'hidden'
+      }
+    },
+      // Panes
+      panes.map((pane, index) => renderPane(pane, index))
+    ),
     
     // Cill
     renderCill(),
