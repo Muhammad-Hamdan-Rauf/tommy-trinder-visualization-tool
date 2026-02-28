@@ -2043,59 +2043,7 @@ html, body {
   margin: 0;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-  .designer-content {
-    flex-direction: column;
-  }
-  
-  .options-sidebar {
-    width: 100%;
-    max-height: 200px;
-    border-right: none;
-    border-bottom: 1px solid var(--border-light);
-  }
-}
-
-@media (max-width: 768px) {
-  .app-header {
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-  }
-  
-  .header-logo {
-    order: 1;
-  }
-  
-  .header-center {
-    order: 3;
-    width: 100%;
-  }
-  
-  .header-actions {
-    order: 2;
-  }
-  
-  .nav-tab {
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: 0.75rem;
-  }
-  
-  .modal-container {
-    margin: var(--spacing-sm);
-  }
-  
-  .color-grid,
-  .textures-grid,
-  .handles-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .dimensions-row,
-  .cill-dimensions {
-    flex-direction: column;
-  }
-}
+/* Responsive - Basic overrides (detailed styles at end of file) */
 
 /* Welcome Screen */
 .welcome-mode {
@@ -3070,41 +3018,7 @@ html, body {
   box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
 }
 
-/* Responsive adjustments for quote modal */
-@media (max-width: 768px) {
-  .quote-header {
-    flex-direction: column;
-    gap: var(--spacing-md);
-  }
-  
-  .quote-header-right {
-    text-align: left;
-    width: 100%;
-  }
-  
-  .quote-total-display {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .project-info-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .customer-form .form-row {
-    flex-direction: column;
-  }
-  
-  .quote-actions {
-    flex-direction: column;
-  }
-  
-  .quote-actions .btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
+/* Quote modal responsive styles are in the comprehensive responsive section at end of file */
 
 
 /* ===== REAL-TIME PRICING STYLES ===== */
@@ -3296,8 +3210,206 @@ html, body {
   flex-wrap: wrap;
 }
 
-/* Responsive adjustments for pricing */
+/* Pricing responsive adjustments are in the comprehensive responsive section below */
+
+/* ===== COMPREHENSIVE RESPONSIVE STYLES ===== */
+
+/* Large Tablets and Small Desktops (max-width: 1200px) */
+@media (max-width: 1200px) {
+  .app-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .header-logo {
+    flex: 0 0 180px;
+  }
+  
+  .logo-title {
+    font-size: 1.1rem;
+  }
+  
+  .location-title {
+    font-size: 20px;
+  }
+  
+  .product-type {
+    font-size: 12px;
+  }
+  
+  .options-sidebar {
+    width: 260px;
+  }
+  
+  .nav-tab {
+    padding: var(--spacing-sm) 12px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Tablets (max-width: 1024px) */
 @media (max-width: 1024px) {
+  .app-header {
+    height: auto;
+    min-height: 60px;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .header-logo {
+    flex: 0 0 auto;
+  }
+  
+  .header-center {
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .location-title {
+    font-size: 18px;
+  }
+  
+  .designer-content {
+    flex-direction: column;
+    flex-wrap: wrap;
+    height: calc(100vh - 130px);
+    overflow: hidden;
+  }
+  
+  .options-sidebar {
+    width: 100%;
+    order: 3; /* Options panel at bottom */
+    max-height: 180px;
+    min-height: 120px;
+    border-right: none;
+    border-top: 1px solid var(--border-light);
+    border-bottom: none;
+    padding: var(--spacing-sm);
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  
+  .window-preview-area {
+    order: 1;
+    flex: 1;
+    min-height: 300px;
+    padding: var(--spacing-md);
+    overflow: auto;
+  }
+  
+  /* Canvas Area - Tablet adjustments */
+  .canvas-area {
+    order: 1; /* Show canvas first */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+    height: auto;
+  }
+  
+  .canvas-split-view {
+    flex-direction: column;
+    flex: 1;
+    min-height: 350px;
+  }
+  
+  .drawing-section,
+  .preview-section {
+    flex: 1;
+    min-height: 180px;
+  }
+  
+  .drawing-section {
+    border-right: none;
+    border-bottom: 2px solid var(--border-light);
+  }
+  
+  .canvas-container {
+    flex: 1;
+    min-height: 150px;
+  }
+  
+  .canvas-container {
+    min-height: 300px;
+    height: 100%;
+  }
+  
+  .canvas-container .drawing-canvas {
+    min-height: 300px;
+  }
+  
+  .live-window-preview {
+    min-height: 200px;
+  }
+  
+  .drawing-toolbar {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: var(--spacing-xs);
+  }
+  
+  /* Tools Sidebar - Tablet: Horizontal at bottom of canvas */
+  .tools-sidebar {
+  /* Tools Sidebar - Tablet: Horizontal at bottom of canvas */
+  .tools-sidebar {
+    order: 2; /* Between canvas and options */
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    border-left: none;
+    border-top: 1px solid var(--border-light);
+    padding: var(--spacing-sm);
+    gap: 8px;
+  }
+  
+  .sidebar-tool-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+  
+  .tools-divider {
+    width: 1px;
+    height: 30px;
+    margin: 0 var(--spacing-xs);
+  }
+  
+  .panel {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .tab-navigation {
+    padding: 0 var(--spacing-sm);
+    justify-content: flex-start;
+  }
+  
+  .nav-tab {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.7rem;
+  }
+  
+  /* Modal adjustments */
+  .modal-container {
+    margin: var(--spacing-md);
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 32px);
+  }
+  
+  .modal-container.large {
+    max-width: calc(100vw - 32px);
+  }
+  
+  /* Grids */
+  .opener-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+  
+  .color-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-sm);
+  }
+  
+  /* Price display */
   .header-right-section {
     gap: var(--spacing-sm);
   }
@@ -3316,18 +3428,711 @@ html, body {
   }
 }
 
+/* Large Phones / Small Tablets (max-width: 768px) */
 @media (max-width: 768px) {
-  .header-right-section {
-    flex-wrap: wrap;
-    justify-content: flex-end;
+  :root {
+    font-size: 13px;
   }
   
+  .app-header {
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    height: auto;
+  }
+  
+  .header-logo {
+    order: 1;
+    flex: 0 0 auto;
+  }
+  
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .logo-title {
+    font-size: 1rem;
+  }
+  
+  .logo-subtitle {
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+  }
+  
+  .header-center {
+    order: 3;
+    width: 100%;
+    padding: var(--spacing-xs) 0;
+  }
+  
+  .location-title {
+    font-size: 16px;
+  }
+  
+  .product-type {
+    font-size: 11px;
+  }
+  
+  .header-actions {
+    order: 2;
+    flex: 0 0 auto;
+  }
+  
+  .header-right-section {
+    order: 2;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--spacing-xs);
+  }
+  
+  .header-quote-btn {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+  
+  .price-display-compact {
+    padding: 4px 8px;
+  }
+  
+  .price-display-compact .price-label {
+    font-size: 0.6rem;
+  }
+  
+  .price-display-compact .price-amount {
+    font-size: 0.9rem;
+  }
+  
+  .add-item-btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.75rem;
+  }
+  
+  .close-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+  }
+  
+  /* Tab Navigation */
+  .tab-navigation {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    justify-content: flex-start;
+    padding: 0;
+  }
+  
+  .tab-navigation::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .nav-tab {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.7rem;
+    flex-shrink: 0;
+  }
+  
+  /* Designer Content */
+  .designer-content {
+    flex-direction: column;
+    height: calc(100vh - 140px); /* Account for header and tabs */
+    overflow: hidden;
+  }
+  
+  .options-sidebar {
+    width: 100%;
+    order: 3; /* Move sidebar to bottom */
+    max-height: 25vh;
+    min-height: 100px;
+    border-right: none;
+    border-top: 1px solid var(--border-light);
+    border-bottom: none;
+    padding: var(--spacing-sm);
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  
+  .window-preview-area {
+    order: 1; /* Show preview first */
+    flex: 1;
+    min-height: 40vh;
+    max-height: 60vh;
+    padding: var(--spacing-md);
+    overflow: auto;
+  }
+  
+  /* Canvas Area - Mobile adjustments */
+  .canvas-area {
+    order: 1; /* Canvas first */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px;
+    height: auto;
+  }
+  
+  .canvas-split-view {
+    flex-direction: column;
+    flex: 1;
+  }
+  
+  .drawing-section,
+  .preview-section {
+    flex: 1;
+    min-height: 140px;
+  }
+  
+  .drawing-section {
+    border-right: none;
+    border-bottom: 2px solid var(--border-light);
+  }
+  
+  .canvas-container {
+    min-height: 200px;
+    height: 100%;
+  }
+  
+  .canvas-container .drawing-canvas {
+    min-height: 200px;
+  }
+  
+  .section-label {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  
+  .live-window-preview {
+    min-height: 120px;
+    padding: 10px;
+  }
+  
+  /* Tools Sidebar - Mobile: Smaller horizontal bar */
+  .tools-sidebar {
+    order: 2; /* Between canvas and options */
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    border-left: none;
+    border-top: 1px solid var(--border-light);
+    padding: var(--spacing-xs);
+    gap: 6px;
+    background: var(--bg-white);
+    flex-shrink: 0;
+  }
+  
+  .sidebar-tool-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+  
+  .tools-divider {
+    display: none;
+  }
+  
+  /* Panels */
+  .panel {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .panel h3 {
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .panel-description {
+    font-size: 0.8rem;
+  }
+  
+  /* Extras */
+  .extra-item {
+    padding: var(--spacing-sm);
+  }
+  
+  .extra-item-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+  
+  .extra-label {
+    font-size: 13px;
+  }
+  
+  .extra-description {
+    font-size: 11px;
+  }
+  
+  /* Finish Sections */
+  .finish-section {
+    padding: var(--spacing-sm);
+  }
+  
+  .finish-swatch {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Price Guide */
   .price-guide {
     flex-direction: column;
     gap: 4px;
+    padding: 8px 10px;
+    font-size: 0.7rem;
   }
   
-  .price-guide span:not(.price-guide-label) {
-    display: inline-block;
+  /* Modal Container */
+  .modal-container {
+    margin: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    max-height: calc(100vh - 16px);
+  }
+  
+  .modal-header {
+    padding: var(--spacing-md);
+  }
+  
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .modal-body {
+    padding: var(--spacing-md);
+  }
+  
+  .modal-footer {
+    padding: var(--spacing-md);
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+  }
+  
+  /* Grids */
+  .color-grid,
+  .textures-grid,
+  .handles-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+  
+  .opener-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .opener-card {
+    padding: var(--spacing-md);
+  }
+  
+  /* Forms */
+  .form-row {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .dimensions-row,
+  .cill-dimensions {
+    flex-direction: column;
+  }
+  
+  /* Buttons */
+  .btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.85rem;
+  }
+  
+  /* Quote Modal */
+  .quote-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .quote-header-right {
+    text-align: left;
+    width: 100%;
+  }
+  
+  .quote-total-display {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .project-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .customer-form .form-row {
+    flex-direction: column;
+  }
+  
+  .quote-actions {
+    flex-direction: column;
+  }
+  
+  .quote-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Drawing Canvas */
+  .drawing-toolbar {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .floating-continue-btn {
+    bottom: 15px;
+    right: 15px;
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+  
+  /* Footer */
+  .window-designer-footer {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .footer-quote-btn {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Mobile Phones (max-width: 576px) */
+@media (max-width: 576px) {
+  :root {
+    font-size: 12px;
+  }
+  
+  .app-header {
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+  
+  .header-logo {
+    gap: var(--spacing-xs);
+  }
+  
+  .logo-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .logo-title {
+    font-size: 0.9rem;
+  }
+  
+  .logo-subtitle {
+    display: none;
+  }
+  
+  .location-title {
+    font-size: 14px;
+  }
+  
+  .product-type {
+    font-size: 10px;
+  }
+  
+  .header-right-section {
+    width: 100%;
+    justify-content: space-between;
+    order: 3;
+    margin-top: var(--spacing-xs);
+  }
+  
+  .header-quote-btn {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .price-display-compact {
+    flex: 1;
+    align-items: center;
+  }
+  
+  /* Tab Navigation */
+  .nav-tab {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.65rem;
+  }
+  
+  /* Options Sidebar */
+  .options-sidebar {
+    max-height: 25vh;
+    min-height: 100px;
+    padding: var(--spacing-xs);
+  }
+  
+  /* Window Preview */
+  .window-preview-area {
+    min-height: 35vh;
+    max-height: 55vh;
+    padding: var(--spacing-sm);
+  }
+  
+  /* Extras */
+  .extra-item {
+    padding: var(--spacing-xs);
+  }
+  
+  .extra-item-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+  
+  .extra-label {
+    font-size: 12px;
+  }
+  
+  .extra-description {
+    font-size: 10px;
+  }
+  
+  .toggle-indicator {
+    font-size: 9px;
+  }
+  
+  /* Price Badge */
+  .price-badge {
+    padding: 1px 6px;
+    font-size: 0.65rem;
+  }
+  
+  /* Modals */
+  .modal-container {
+    margin: 8px;
+    border-radius: var(--radius-sm);
+  }
+  
+  .modal-header {
+    padding: var(--spacing-sm);
+  }
+  
+  .modal-header h2 {
+    font-size: 1rem;
+  }
+  
+  .modal-body {
+    padding: var(--spacing-sm);
+  }
+  
+  .modal-footer {
+    padding: var(--spacing-sm);
+  }
+  
+  /* Grids */
+  .color-grid,
+  .textures-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-xs);
+  }
+  
+  .handles-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .swatch-preview-box {
+    width: 50px;
+    height: 35px;
+  }
+  
+  .swatch-label {
+    font-size: 0.7rem;
+  }
+  
+  /* Buttons */
+  .btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.8rem;
+  }
+  
+  .modal-footer .btn {
+    flex: 1;
+  }
+  
+  /* Quote Modal */
+  .project-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quote-item {
+    font-size: 0.85rem;
+  }
+  
+  .quote-total-row {
+    font-size: 1rem;
+  }
+  
+  /* Drawing Canvas */
+  .drawing-toolbar {
+    padding: var(--spacing-xs);
+    gap: var(--spacing-xs);
+  }
+  
+  .floating-continue-btn {
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+  
+  /* Dimension Labels */
+  .dimension-label {
+    font-size: 0.65rem;
+  }
+  
+  .dim-value {
+    padding: 1px 4px;
+  }
+  
+  /* Option Card */
+  .option-card {
+    padding: var(--spacing-sm);
+  }
+  
+  /* Input fields */
+  .input-field,
+  .select-field {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.85rem;
+  }
+  
+  /* Toggle */
+  .toggle-switch {
+    width: 44px;
+    height: 24px;
+  }
+  
+  .toggle-thumb {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .toggle-switch.active .toggle-thumb {
+    left: 23px;
+  }
+}
+
+/* Extra Small Phones (max-width: 400px) */
+@media (max-width: 400px) {
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .header-logo {
+    justify-content: center;
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .header-center {
+    order: 2;
+    width: 100%;
+  }
+  
+  .header-right-section {
+    order: 3;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .header-quote-btn,
+  .price-display-compact {
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .tab-navigation {
+    gap: 0;
+  }
+  
+  .nav-tab {
+    padding: var(--spacing-xs);
+    font-size: 0.6rem;
+  }
+  
+  .color-grid,
+  .textures-grid,
+  .handles-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .price-guide {
+    font-size: 0.65rem;
+  }
+}
+
+/* Landscape Mode Adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+  .app-header {
+    padding: var(--spacing-xs) var(--spacing-md);
+    min-height: auto;
+  }
+  
+  .location-title {
+    font-size: 14px;
+  }
+  
+  .product-type {
+    display: none;
+  }
+  
+  .options-sidebar {
+    max-height: 150px;
+  }
+  
+  .modal-container {
+    max-height: calc(100vh - 20px);
+  }
+  
+  .modal-body {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .nav-tab {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn {
+    min-height: 44px;
+  }
+  
+  .extra-item {
+    min-height: 60px;
+  }
+  
+  .finish-section {
+    min-height: 50px;
+  }
+  
+  .option-card {
+    min-height: 50px;
+  }
+  
+  .close-btn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  
+  /* Better touch targets */
+  .pane-opener-item,
+  .pane-glass-item {
+    min-height: 50px;
+  }
+  
+  .color-swatch-card {
+    min-height: 60px;
   }
 }
