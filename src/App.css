@@ -2770,3 +2770,564 @@ html, body {
 .extra-edit-btn:hover {
   color: var(--primary-green);
 }
+
+/* ===== QUOTE MODAL STYLES ===== */
+
+.quote-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.quote-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--bg-light);
+}
+
+.quote-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.quote-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.quote-reference,
+.quote-date {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.quote-header-right {
+  text-align: right;
+}
+
+.quote-total-display {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: linear-gradient(135deg, var(--primary-green), #2d8a5e);
+  color: white;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  min-width: 140px;
+}
+
+.quote-total-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+.quote-total-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.quote-section {
+  background: var(--bg-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.quote-section .section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Customer Form */
+.customer-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.customer-form .form-row {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.quote-input {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  transition: border-color var(--transition-fast);
+  background: white;
+}
+
+.quote-input:focus {
+  outline: none;
+  border-color: var(--primary-green);
+}
+
+/* Project Info Grid */
+.project-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.project-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.project-info-item .info-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.project-info-item .info-value {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Quote Items List */
+.quote-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.quote-category {
+  margin-bottom: var(--spacing-xs);
+}
+
+.category-header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-green);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: var(--spacing-xs);
+}
+
+.quote-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: white;
+  border-radius: var(--radius-sm);
+}
+
+.item-description {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.item-price {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+/* Quote Totals */
+.quote-totals {
+  background: var(--bg-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+}
+
+.totals-row.subtotal,
+.totals-row.vat {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.totals-row.total {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-top: 2px solid var(--border-light);
+  padding-top: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+}
+
+/* Quote Notes */
+.quote-notes {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+  background: white;
+}
+
+.quote-notes:focus {
+  outline: none;
+  border-color: var(--primary-green);
+}
+
+.quote-validity {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Quote Actions */
+.quote-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-light);
+}
+
+.quote-actions .btn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.quote-actions .btn-secondary {
+  background: var(--bg-light);
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+}
+
+.quote-actions .btn-secondary:hover {
+  background: var(--bg-dark);
+  color: white;
+}
+
+.quote-actions .btn-primary {
+  background: linear-gradient(135deg, var(--primary-green), #2d8a5e);
+  border: none;
+  color: white;
+}
+
+.quote-actions .btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
+}
+
+.quote-actions .btn-primary.loading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+/* Footer Quote Button */
+.footer-quote-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: linear-gradient(135deg, var(--primary-green), #2d8a5e);
+  color: white;
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-left: var(--spacing-md);
+}
+
+.footer-quote-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
+}
+
+/* Responsive adjustments for quote modal */
+@media (max-width: 768px) {
+  .quote-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .quote-header-right {
+    text-align: left;
+    width: 100%;
+  }
+  
+  .quote-total-display {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .project-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .customer-form .form-row {
+    flex-direction: column;
+  }
+  
+  .quote-actions {
+    flex-direction: column;
+  }
+  
+  .quote-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+/* ===== REAL-TIME PRICING STYLES ===== */
+
+/* Price Badge - Inline price indicator */
+.price-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary-green), #2d8a5e);
+  color: white;
+  white-space: nowrap;
+  margin-left: 6px;
+}
+
+.price-badge.included {
+  background: var(--bg-light);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Price Guide - Quick reference in panels */
+.price-guide {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #e8f5e9 100%);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  font-size: 0.75rem;
+  color: #2d5a3d;
+  border: 1px solid #c8e6c9;
+}
+
+.price-guide-label {
+  font-weight: 600;
+  color: #1b4332;
+}
+
+.price-guide span:not(.price-guide-label) {
+  background: white;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  color: #2d5a3d;
+}
+
+/* Header Right Section - Contains price widget and quote button */
+.header-right-section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* Compact Price Display in Header */
+.price-display-compact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, rgba(52, 168, 83, 0.1), rgba(45, 138, 94, 0.15));
+  border: 1px solid rgba(52, 168, 83, 0.3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.price-display-compact:hover {
+  background: linear-gradient(135deg, rgba(52, 168, 83, 0.15), rgba(45, 138, 94, 0.2));
+  transform: translateY(-1px);
+}
+
+.price-display-compact .price-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.price-display-compact .price-amount {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-green);
+}
+
+/* Header Quote Button */
+.header-quote-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--primary-green), #2d8a5e);
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(52, 168, 83, 0.3);
+}
+
+.header-quote-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(52, 168, 83, 0.4);
+}
+
+.header-quote-btn:active {
+  transform: translateY(0);
+}
+
+/* Full Price Display Widget (sidebar) */
+.price-display {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+}
+
+.price-display-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.price-display .price-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.price-display .price-vat-note {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.price-display .price-main {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.price-display .price-amount-large {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary-green);
+}
+
+.price-display .price-breakdown-mini {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  padding-top: 8px;
+  border-top: 1px solid var(--border-light);
+}
+
+.price-display .view-quote-btn {
+  margin-top: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, var(--primary-green), #2d8a5e);
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.price-display .view-quote-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(52, 168, 83, 0.3);
+}
+
+/* Adjust extra-label-row to accommodate price badges */
+.extra-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Responsive adjustments for pricing */
+@media (max-width: 1024px) {
+  .header-right-section {
+    gap: var(--spacing-sm);
+  }
+  
+  .header-quote-btn {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+  
+  .price-display-compact {
+    padding: 6px 10px;
+  }
+  
+  .price-display-compact .price-amount {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-right-section {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  
+  .price-guide {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .price-guide span:not(.price-guide-label) {
+    display: inline-block;
+  }
+}

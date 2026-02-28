@@ -14,6 +14,7 @@ import { FinishModal, CillModal } from './modals/FinishModals.js';
 import GlassModal from './modals/GlassModal.js';
 import GlazingModal from './modals/GlazingModal.js';
 import HardwareModal from './modals/HardwareModal.js';
+import QuoteModal from './modals/QuoteModal.js';
 
 /**
  * WindowDesigner Component
@@ -224,6 +225,13 @@ function WindowDesigner() {
         extras: state.extras,
         initialTab: modalData || 'CILL',
         onApply: handleExtrasApply
+      }),
+      
+      // Quote Modal
+      React.createElement(QuoteModal, {
+        isOpen: activeModal === 'quote',
+        onClose: handleCloseModal,
+        windowState: state
       })
     );
   };
@@ -264,7 +272,8 @@ function WindowDesigner() {
           actions.resetWindow();
           setViewMode('setup');
         }
-      }
+      },
+      onGenerateQuote: () => handleOpenModal('quote')
     }),
     
     React.createElement(TabNavigation, {

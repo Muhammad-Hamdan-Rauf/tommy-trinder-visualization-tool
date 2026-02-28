@@ -1,11 +1,12 @@
 import React from 'react';
 import { useWindow } from '../../context/WindowContext.js';
+import { PriceDisplay } from '../common/PriceDisplay.js';
 
 /**
  * Header Component
- * Main header with logo, location, product type, and actions
+ * Main header with logo, location, product type, pricing widget, and actions
  */
-function Header({ onAddItem, onClose }) {
+function Header({ onAddItem, onClose, onGenerateQuote }) {
   const { state } = useWindow();
   
   return React.createElement('header', { className: 'app-header' },
@@ -36,16 +37,29 @@ function Header({ onAddItem, onClose }) {
       )
     ),
     
-    // Actions
-    React.createElement('div', { className: 'header-actions' },
+    // Right side - Price widget and actions
+    React.createElement('div', { className: 'header-right-section' },
+      // Price Display Widget
+      React.createElement(PriceDisplay, { compact: true }),
+      
+      // Generate Quote Button (prominent)
       React.createElement('button', {
-        className: 'add-item-btn',
-        onClick: onAddItem
-      }, 'Add Item +'),
-      React.createElement('button', {
-        className: 'close-btn',
-        onClick: onClose
-      }, '✕')
+        className: 'header-quote-btn',
+        onClick: onGenerateQuote,
+        title: 'Generate detailed quote'
+      }, '📋 Get Quote'),
+      
+      // Other actions
+      React.createElement('div', { className: 'header-actions' },
+        React.createElement('button', {
+          className: 'add-item-btn',
+          onClick: onAddItem
+        }, 'Add Item +'),
+        React.createElement('button', {
+          className: 'close-btn',
+          onClick: onClose
+        }, '✕')
+      )
     )
   );
 }
